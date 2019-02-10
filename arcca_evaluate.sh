@@ -12,8 +12,8 @@
 #SBATCH -J tensorflowTest
 #SBATCH -o output-%J.o
 #SBATCH -n 1
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks=4
+#SBATCH --ntasks-per-node=4
 
 module load CUDA/9.1
 module load tensorflow
