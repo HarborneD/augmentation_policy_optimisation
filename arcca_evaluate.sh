@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh --login
 
 #SCW_TPN_OVERRIDE=1 #overide warning about 1 node
 # BASH Environment Variable	           SBATCH Field Code	Description
@@ -9,11 +9,11 @@
 #SBATCH --gres=gpu:2
 #SBATCH -p gpu
 
-#SBATCH -J tensorflowTest
+#SBATCH --job-name=eval_child_model
 #SBATCH -o output-%J.o
 #SBATCH -n 1
-#SBATCH --ntasks=4
-#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
 module load tensorflow
