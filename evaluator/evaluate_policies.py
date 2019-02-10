@@ -482,6 +482,5 @@ def main(_):
 print("test if")
 main("")
 if __name__ == '__main__':
-  print("test m")
   tf.logging.set_verbosity(tf.logging.INFO)
   tf.app.run()
