@@ -25,7 +25,7 @@ CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
 DATA_PATH="/home/c.c0919382/datasets/cifar-10-batches-py"
 DATASET="cifar10"
 
-python2 -m evaluator.evaluate_policies.py \
+python -m evaluator.evaluate_policies.py \
     --model_name=$MODEL_NAME \
     --checkpoint_dir=$CHECKPOINT_DIR \
     --data_path $DATA_PATH \
