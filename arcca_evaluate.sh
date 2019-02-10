@@ -20,8 +20,6 @@ module load python-numpy
 module load python-h5py
 module load tensorflow
 
-pip install --user keras
-
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
 DATA_PATH="/home/c.c0919382/datasets/cifar-10-batches-py"
