@@ -1,0 +1,9 @@
+Collecting keras
+  Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.VerifiedHTTPSConnection object at 0x2ad4d5e26630>: Failed to establish a new connection: [Errno 101] Network is unreachable',)': /simple/keras/
+  Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.VerifiedHTTPSConnection object at 0x2ad4d5e26518>: Failed to establish a new connection: [Errno 101] Network is unreachable',)': /simple/keras/
+  Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.VerifiedHTTPSConnection object at 0x2ad4d5e264a8>: Failed to establish a new connection: [Errno 101] Network is unreachable',)': /simple/keras/
+  Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.VerifiedHTTPSConnection object at 0x2ad4d5e26470>: Failed to establish a new connection: [Errno 101] Network is unreachable',)': /simple/keras/
+  Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.VerifiedHTTPSConnection object at 0x2ad4d5e26128>: Failed to establish a new connection: [Errno 101] Network is unreachable',)': /simple/keras/
+  Could not find a version that satisfies the requirement keras (from versions: )
+No matching distribution found for keras
+/usr/bin/python2: No module named tensorflow
