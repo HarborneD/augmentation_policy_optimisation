@@ -16,9 +16,10 @@
 #SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
-module load python-numpy
-module load python-h5py
+module load pip
+python -m pip install numpy --user
 module load tensorflow
+
 
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
