@@ -17,10 +17,9 @@
 
 module load CUDA/9.1
 module load pip 
+python -m pip install tensorflow-gpu --user
 python -m pip install pickle --user
-echo now load TF
-module load tensorflow
-echo tf loaded
+
 
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
