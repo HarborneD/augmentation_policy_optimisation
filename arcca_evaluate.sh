@@ -17,8 +17,10 @@
 
 module load CUDA/9.1
 module load pip
-python -m pip install --upgrade --force-reinstall pip --user
+python -m pip install --upgrade pip --user
+echo now install numpy
 python -m pip install --upgrade --force-reinstall numpy --user
+echo now load TF
 module load tensorflow
 
 
