@@ -20,7 +20,12 @@ from __future__ import division
 from __future__ import print_function
 
 import copy
-import cPickle
+
+try:
+   import cPickle
+except:
+   import pickle as Cpickle
+
 import os
 import evaluator.augmentation_transforms as augmentation_transforms
 import numpy as np

@@ -35,20 +35,6 @@ from evaluator.wrn import build_wrn_model
 
 
 
-tf.flags.DEFINE_string('model_name', 'wrn',
-                       'wrn, shake_shake_32, shake_shake_96, shake_shake_112, '
-                       'pyramid_net')
-tf.flags.DEFINE_string('checkpoint_dir', '/tmp/training', 'Training Directory.')
-tf.flags.DEFINE_string('data_path', '/tmp/data',
-                       'Directory where dataset is located.')
-tf.flags.DEFINE_string('dataset', 'cifar10',
-                       'Dataset to train with. Either cifar10 or cifar100')
-tf.flags.DEFINE_integer('use_cpu', 0, '1 if use CPU, else GPU.')
-tf.flags.DEFINE_string('policy_id', '000001', 'id of policy to be evaluated')
-tf.flags.DEFINE_integer('num_epochs', 1, 'Number of epochs to train model before evaluating')
-
-FLAGS = tf.flags.FLAGS
-
 arg_scope = tf.contrib.framework.arg_scope
 
 
@@ -392,6 +378,7 @@ class CifarModelTrainer(object):
       self.single_session_create(m)
       
       for curr_epoch in xrange(starting_epoch, hparams.num_epochs):
+        print("Training Epoch: "+str(curr_epoch))
         # Run one training epoch
         # training_accuracy = self._run_training_loop(m, curr_epoch)
         train_accuracy = helper_utils.run_epoch_training(self._session, m, self.data_loader, curr_epoch)
@@ -399,12 +386,11 @@ class CifarModelTrainer(object):
         if(curr_epoch == hparams.num_epochs-1):
           self.save_model(step=curr_epoch)
 
-      valid_accuracy, test_accuracy = self._compute_final_accuracies(
-          meval)
+      valid_accuracy, test_accuracy = self._compute_final_accuracies(meval)
 
-    tf.logging.info(
-        'Train Acc: {}    Valid Acc: {}     Test Acc: {}'.format(
-            training_accuracy, valid_accuracy, test_accuracy))
+    tf.logging.info('Train Acc: {}    Valid Acc: {}     Test Acc: {}'.format(training_accuracy, valid_accuracy, test_accuracy))
+
+    return valid_accuracy, test_accuracy
 
   @property
   def saver(self):
@@ -419,8 +405,10 @@ class CifarModelTrainer(object):
     return self._num_trainable_params
 
 
-def main(_):
-  print("test 1")
+def TrainModelWithPolicies(flag_arg):
+  global FLAGS 
+  FLAGS = flag_arg
+
   if FLAGS.dataset not in ['cifar10', 'cifar100']:
     raise ValueError('Invalid dataset: %s' % FLAGS.dataset)
   hparams = tf.contrib.training.HParams(
@@ -473,13 +461,28 @@ def main(_):
     
   else:
     raise ValueError('Not Valid Model Name: %s' % FLAGS.model_name)
-  print("test h")
   cifar_trainer = CifarModelTrainer(hparams)
   
-  print("test r")
-  cifar_trainer.run_model()
+  valid_accuracy, test_accuracy = cifar_trainer.run_model()
 
-print("test if")
+  return valid_accuracy, test_accuracy
+
 if __name__ == '__main__':
+
+
+  tf.flags.DEFINE_string('model_name', 'wrn',
+                        'wrn, shake_shake_32, shake_shake_96, shake_shake_112, '
+                        'pyramid_net')
+  tf.flags.DEFINE_string('checkpoint_dir', '/tmp/training', 'Training Directory.')
+  tf.flags.DEFINE_string('data_path', '/tmp/data',
+                        'Directory where dataset is located.')
+  tf.flags.DEFINE_string('dataset', 'cifar10',
+                        'Dataset to train with. Either cifar10 or cifar100')
+  tf.flags.DEFINE_integer('use_cpu', 0, '1 if use CPU, else GPU.')
+  tf.flags.DEFINE_string('policy_id', '000001', 'id of policy to be evaluated')
+  tf.flags.DEFINE_integer('num_epochs', 1, 'Number of epochs to train model before evaluating')
+
+  FLAGS = tf.flags.FLAGS
+
   tf.logging.set_verbosity(tf.logging.INFO)
   tf.app.run()
