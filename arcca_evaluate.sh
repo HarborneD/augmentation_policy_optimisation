@@ -16,7 +16,8 @@
 #SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
-module load python-numpy
+module load pip
+python -m pip install --upgrade --force-reinstall pip --user
 module load tensorflow
 
 
