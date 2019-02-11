@@ -3,62 +3,62 @@
         "policy": [
             [
                 [
-                    "AutoContrast", 
-                    0.6, 
-                    2
-                ], 
-                [
-                    "FlipLR", 
-                    0.5, 
+                    "Rotate", 
+                    0.9, 
                     0
-                ]
-            ], 
-            [
-                [
-                    "FlipLR", 
-                    0.5, 
-                    1
-                ], 
-                [
-                    "Smooth", 
-                    0.0, 
-                    9
-                ]
-            ], 
-            [
-                [
-                    "TranslateY", 
-                    0.7, 
-                    4
                 ], 
                 [
                     "Blur", 
-                    0.8, 
-                    9
+                    0.4, 
+                    2
                 ]
             ], 
             [
                 [
-                    "Solarize", 
-                    0.5, 
+                    "CropBilinear", 
+                    0.1, 
+                    5
+                ], 
+                [
+                    "Rotate", 
+                    0.6, 
+                    2
+                ]
+            ], 
+            [
+                [
+                    "Smooth", 
+                    0.8, 
+                    4
+                ], 
+                [
+                    "Posterize", 
+                    0.7, 
+                    4
+                ]
+            ], 
+            [
+                [
+                    "Color", 
+                    0.9, 
                     8
                 ], 
                 [
-                    "Brightness", 
-                    0.5, 
+                    "ShearY", 
+                    0.8, 
                     7
                 ]
             ], 
             [
                 [
-                    "Smooth", 
-                    0.3, 
-                    3
+                    "Solarize", 
+                    0.2, 
+                    5
                 ], 
                 [
-                    "Cutout", 
+                    "Sharpness", 
                     0.0, 
-                    0
+                    10
                 ]
             ]
         ], 
