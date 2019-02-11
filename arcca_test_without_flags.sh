@@ -6,7 +6,7 @@
 # $SLURM_ARRAY_JOB_ID	                %A	                Array parent job identifier
 # $SLURM_ARRAY_TASK_ID	                %a	                Array job iteration index
 
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH -p gpu
 
 #SBATCH --job-name=eval_child_model
