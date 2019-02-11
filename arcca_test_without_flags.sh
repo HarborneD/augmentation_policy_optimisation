@@ -16,6 +16,8 @@
 #SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
+module load pip 
+python -pip install pickle --user
 echo now load TF
 module load tensorflow
 echo tf loaded
