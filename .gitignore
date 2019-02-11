@@ -108,3 +108,6 @@ venv.bak/
 
 #ignore virtual enviroment
 /venv
+
+#ignore default server outputs
+*.o
