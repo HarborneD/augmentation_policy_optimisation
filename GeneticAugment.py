@@ -9,6 +9,7 @@ import math
 import tensorflow as tf
 import evaluator.evaluate_policies_without_flags
 import os 
+import sys
 
 import json
 
@@ -405,10 +406,13 @@ def CreateProbabilitiesDict(prob_crossover,prob_technique_mutate,prob_probabilit
 
 
 if(__name__ == "__main__"):
+    data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
+    if(len(sys.argv) > 1):
+        data_path = sys.argv[1]
     experiment_attributes = {
         "experiment_id":"test_exp_0001"
         ,"num_epochs":2
-        ,"data_path":"/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
+        ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
         ,"use_cpu":0
@@ -459,7 +463,7 @@ if(__name__ == "__main__"):
         print("____")
         print("Starting evolution step: " +str(step))
         print("")
-        
+
         population_fitness = EvaluatePopulation(population,fitness_function, augmentation_list, experiment_attributes, step)
         
       

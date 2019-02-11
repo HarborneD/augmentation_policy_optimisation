@@ -1,6 +1,7 @@
 import tensorflow as tf
 import evaluator.evaluate_policies_without_flags
-import os 
+import os
+import sys
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
@@ -36,10 +37,14 @@ def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_n
 
 
 if __name__ == "__main__":
-    policy_id = "000001"
-    num_epochs = 20
-    model_name = "wrn"
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
+    if(len(sys.argv) > 1):
+        data_path = sys.argv[1]
+    
+    policy_id = "000001"
+    num_epochs = 5
+    model_name = "wrn"
+    data_path = data_path
     dataset = "cifar10"
     use_cpu = 0 
 
