@@ -1,0 +1,6 @@
+Collecting pip
+  Using cached https://files.pythonhosted.org/packages/d7/41/34dd96bd33958e52cb4da2f1bf0818e396514fd4f4725a79199564cd0c20/pip-19.0.2-py2.py3-none-any.whl
+Installing collected packages: pip
+Successfully installed pip-19.0.2
+You are using pip version 10.0.1, however version 19.0.2 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
