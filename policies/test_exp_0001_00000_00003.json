@@ -3,62 +3,62 @@
         "policy": [
             [
                 [
-                    "Invert", 
-                    0.7, 
-                    10
+                    "TranslateX", 
+                    0.2, 
+                    4
                 ], 
                 [
-                    "Solarize", 
-                    0.0, 
-                    6
-                ]
-            ], 
-            [
-                [
-                    "Blur", 
-                    0.8, 
-                    3
-                ], 
-                [
-                    "Invert", 
-                    0.4, 
+                    "Cutout", 
+                    0.9, 
                     1
                 ]
             ], 
             [
                 [
-                    "Equalize", 
-                    0.2, 
-                    4
+                    "Color", 
+                    0.9, 
+                    1
                 ], 
                 [
-                    "TranslateX", 
-                    0.0, 
-                    6
+                    "FlipUD", 
+                    0.2, 
+                    5
+                ]
+            ], 
+            [
+                [
+                    "Blur", 
+                    0.6, 
+                    3
+                ], 
+                [
+                    "Solarize", 
+                    0.2, 
+                    9
                 ]
             ], 
             [
                 [
                     "TranslateX", 
-                    0.2, 
-                    0
+                    0.1, 
+                    5
                 ], 
                 [
                     "Posterize", 
-                    0.9, 
+                    0.8, 
                     8
                 ]
             ], 
             [
                 [
-                    "FlipLR", 
-                    0.4, 
-                    4
+                    "Sharpness", 
+                    0.7, 
+                    6
                 ], 
                 [
-                    "FlipLR", 
-                    0.7, 
-                    2
+                    "Invert", 
+                    0.9, 
+                    4
                 ]
             ]
         ], 

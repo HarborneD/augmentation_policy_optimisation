@@ -3,62 +3,62 @@
         "policy": [
             [
                 [
-                    "Blur", 
-                    0.7, 
-                    9
-                ], 
-                [
                     "ShearY", 
-                    0.8, 
-                    3
-                ]
-            ], 
-            [
+                    0.4, 
+                    2
+                ], 
                 [
-                    "TranslateX", 
+                    "Brightness", 
                     0.3, 
-                    5
-                ], 
-                [
-                    "AutoContrast", 
-                    0.1, 
-                    3
-                ]
-            ], 
-            [
-                [
-                    "TranslateX", 
-                    0.1, 
-                    6
-                ], 
-                [
-                    "ShearY", 
-                    0.3, 
-                    0
-                ]
-            ], 
-            [
-                [
-                    "Sharpness", 
-                    0.7, 
-                    6
-                ], 
-                [
-                    "FlipUD", 
-                    0.8, 
                     1
                 ]
             ], 
             [
                 [
-                    "Brightness", 
-                    0.5, 
-                    4
+                    "FlipUD", 
+                    0.7, 
+                    1
                 ], 
                 [
-                    "Contrast", 
-                    0.1, 
-                    5
+                    "ShearX", 
+                    0.7, 
+                    6
+                ]
+            ], 
+            [
+                [
+                    "ShearY", 
+                    0.0, 
+                    10
+                ], 
+                [
+                    "Smooth", 
+                    0.7, 
+                    7
+                ]
+            ], 
+            [
+                [
+                    "CropBilinear", 
+                    0.3, 
+                    8
+                ], 
+                [
+                    "Smooth", 
+                    0.5, 
+                    10
+                ]
+            ], 
+            [
+                [
+                    "Sharpness", 
+                    0.3, 
+                    3
+                ], 
+                [
+                    "FlipLR", 
+                    0.8, 
+                    10
                 ]
             ]
         ], 
