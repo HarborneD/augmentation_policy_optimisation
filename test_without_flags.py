@@ -22,7 +22,7 @@ FLAGS = tf.flags.FLAGS
 
 def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
     print("Training with policy:"+str(policy_id))
-    checkpoint_dir = os.path.join(os.getcwd(),"checkpoints_"+policy_id)
+    checkpoint_dir = os.path.join(os.getcwd(),"checkpoints","checkpoints_"+policy_id)
 
     FLAGS.model_name = model_name
     FLAGS.checkpoint_dir = checkpoint_dir 
