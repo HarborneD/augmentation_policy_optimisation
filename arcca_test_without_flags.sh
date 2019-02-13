@@ -6,7 +6,7 @@
 # $SLURM_ARRAY_JOB_ID	                %A	                Array parent job identifier
 # $SLURM_ARRAY_TASK_ID	                %a	                Array job iteration index
 
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH -p gpu
 
 #SBATCH --job-name=eval_child_model
@@ -16,11 +16,10 @@
 #SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
-module load pip 
-python -m pip install pickle --user
-echo now load TF
-module load tensorflow
-echo tf loaded
+# module load pip 
+# echo now load TF
+# module load tensorflow
+# echo tf loaded
 
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
