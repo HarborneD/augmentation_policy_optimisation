@@ -16,21 +16,16 @@
 #SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
-echo now load TF
-module load tensorflow
-echo tf loaded
+# module load pip 
+# echo now load TF
+# module load tensorflow
+# echo tf loaded
+
+source /home/c.c0919382/fyp_scw1427/genetic_augment/venv/bin/activate
 
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
 DATA_PATH="/home/c.c0919382/datasets/cifar-10-batches-py"
 DATASET="cifar10"
 
-python -m evaluator.evaluate_policies.py \
-    --model_name=$MODEL_NAME \
-    --checkpoint_dir=$CHECKPOINT_DIR \
-    --data_path $DATA_PATH \
-    --dataset=$DATASET \
-    --use_cpu=0 \
-    --policy_id=$1 \
-    --num_epochs=$2
-
+python test_without_flags.py $DATA_PATH
