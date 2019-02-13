@@ -11,7 +11,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH -p gpu
 
-#SBATCH --job-name=eval_child_model
+#SBATCH --job-name=GA
 #SBATCH -o output-%J.o
 #SBATCH -n 1
 #SBATCH --ntasks=1
