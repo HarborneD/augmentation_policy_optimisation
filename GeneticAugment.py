@@ -400,7 +400,16 @@ def CreateProbabilitiesDict(prob_crossover,prob_technique_mutate,prob_probabilit
         "prob_magnitude_mutate": prob_magnitude_mutate 
     }
 
+def LogGeneration(experiment_id,generation_stats):
+    generation_string =""
 
+    keys = ["step","max_fitness","min_fitness","average_fitness"]
+    for k in keys:
+        generation_string += str(generation_stats[k]) + ","
+    
+    generation_string = generation_string[:-1]+"\n"
+    with open(experiment_id+".csv","a") as f:
+        f.write(generation_string)
 
 
 
@@ -410,8 +419,8 @@ if(__name__ == "__main__"):
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
-        "experiment_id":"test_exp_0001"
-        ,"num_epochs":2
+        "experiment_id":"test_exp_0001_20e_10p_5-2"
+        ,"num_epochs":20
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
@@ -428,7 +437,7 @@ if(__name__ == "__main__"):
     num_technqiues_per_sub_policy = 2
     num_sub_policies_per_policy = 5
     
-    population_size = 4
+    population_size = 10
 
     prob_crossover = 0.001
     prob_technique_mutate = 0.001
@@ -476,15 +485,29 @@ if(__name__ == "__main__"):
      
 
         fitness_vals = [x[1]for x in population_fitness]
+
+        generation_stats = {
+                "step":step
+                ,"max_fitness":max(fitness_vals)
+                ,"min_fitness":min(fitness_vals)
+                ,"average_fitness":sum(fitness_vals)/float(len(fitness_vals))
+            }
+
+        LogGeneration(experiment_attributes["experiment_id"],generation_stats)
+
         if(step % 1==0):
             print("step:",step)
-            print("Max Fitness:", max(fitness_vals))
-            print("Min Fitness:", min(fitness_vals))
-            print("Average Fitness:", sum(fitness_vals)/float(len(fitness_vals)))
+            print("Max Fitness:", generation_stats["max_fitness"])
+            print("Min Fitness:", generation_stats["min_fitness"] )
+            print("Average Fitness:", generation_stats["average_fitness"] )
             # for p in population_fitness:
             #     print(p)
             print("-----")
             print("")
+
+            
+
+
         population = MoveToNextGeneration(population_fitness, evolution_probabilities, species_attributes, elitism_ratio=0.05)
 
 
