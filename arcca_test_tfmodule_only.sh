@@ -9,11 +9,14 @@
 #SBATCH --gres=gpu:1
 #SBATCH -p gpu
 
-#SBATCH --job-name=pip_only
+#SBATCH --job-name=tfmodule_only
 #SBATCH -o output-%J.o
 #SBATCH -n 1
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
+
+
+echo tfmodule_only
 
 module load CUDA/9.1
 module load tensorflow

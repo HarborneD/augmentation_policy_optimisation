@@ -109,9 +109,13 @@ venv.bak/
 
 #ignore checkpoint files
 /checkpoints_*
+/checkpoints
 
 #ignore virtual enviroment
 /venv
 
 #policies
 /policies
+
+#ignore SciKits
+/scikits
