@@ -33,6 +33,7 @@ from evaluator.shake_shake import build_shake_shake_model
 import tensorflow as tf
 from evaluator.wrn import build_wrn_model
 
+print("Imprted evaluate script")
 
 
 arg_scope = tf.contrib.framework.arg_scope
