@@ -400,6 +400,9 @@ def CreateProbabilitiesDict(prob_crossover,prob_technique_mutate,prob_probabilit
         "prob_magnitude_mutate": prob_magnitude_mutate 
     }
 
+
+
+###LOGGING
 def LogGeneration(experiment_id,generation_stats):
     generation_string =""
 

@@ -15,6 +15,8 @@
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 
+echo eval_child_model
+
 module load CUDA/9.1
 echo now load TF
 module load tensorflow

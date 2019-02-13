@@ -15,8 +15,12 @@
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 
+echo pip_only
+
 module load CUDA/9.1
-module load tensorflow
+module load pip 
+
+python -m pip install tensorflow-gpu --user
 
 
 

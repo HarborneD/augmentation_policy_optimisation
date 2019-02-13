@@ -24,7 +24,7 @@ import copy
 try:
    import cPickle
 except:
-   import pickle as Cpickle
+   import pickle as cPickle
 
 import os
 import evaluator.augmentation_transforms as augmentation_transforms
