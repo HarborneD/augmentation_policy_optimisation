@@ -112,3 +112,6 @@ venv.bak/
 
 #ignore virtual enviroment
 /venv
+
+#policies
+/policies
