@@ -9,16 +9,19 @@
 #SBATCH --gres=gpu:1
 #SBATCH -p gpu
 
-#SBATCH --job-name=pip_only
+#SBATCH --job-name=test_venv
 #SBATCH -o output-%J.o
 #SBATCH -n 1
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 
 module load CUDA/9.1
-module load tensorflow
+# module load pip 
+# echo now load TF
+# module load tensorflow
+# echo tf loaded
 
-
+source /home/c.c0919382/fyp_scw1427/genetic_augment/venv/bin/activate
 
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
