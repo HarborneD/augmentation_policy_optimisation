@@ -15,6 +15,8 @@
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 
+echo test_venv
+
 module load CUDA/9.1
 # module load pip 
 # echo now load TF
