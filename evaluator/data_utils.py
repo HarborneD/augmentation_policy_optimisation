@@ -26,6 +26,8 @@ try:
 except:
    import pickle as cPickle
 
+import pickle
+
 import os
 import evaluator.augmentation_transforms as augmentation_transforms
 import numpy as np
@@ -181,8 +183,22 @@ class DataSet(object):
 
 
 def unpickle(f):
-  tf.logging.info('loading file: {}'.format(f))
-  fo = tf.gfile.Open(f, 'r')
-  d = cPickle.load(fo)
-  fo.close()
-  return d
+
+  def Originalunpickle(f):
+    tf.logging.info('loading file: {}'.format(f))
+    fo = tf.gfile.Open(f, 'r')
+    d = cPickle.load(fo)
+    fo.close()
+    return d
+
+  def Myunpickle(f):
+    f_output = None
+    with open(f,"rb") as fl:
+      f_output = pickle.load(fl, encoding='latin1')
+    return f_output
+  
+  try:
+    return Originalunpickle(f)
+  except:
+    return Myunpickle(f)
+
