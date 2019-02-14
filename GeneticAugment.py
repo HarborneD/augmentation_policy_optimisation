@@ -16,19 +16,26 @@ import json
 from test_without_flags import TrainWithPolicy
 
 
+
 ##POPULATION FITNESS CALCULATION FUNCTIONS
 
 def LocalSequential(fitness_function, policies, augmentations, experiment_attributes):
     population_fitness = []
 
     for policy in policies:
-        population_fitness.append( (policy[0], fitness_function(policies[0],augmentations, experiment_attributes, policy[1])) )
+        population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
 
     return population_fitness
 
 
 def ArccaParallel(fitness_function, policies, augmentations, experiment_attributes):
-    pass
+    population_fitness = []
+
+    for policy in policies:
+        population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
+
+    return population_fitness
+
 
 ##CHROMOSOME FITNESS FUNCTIONS
 
@@ -46,6 +53,18 @@ def StorePoliciesAsJsons(chromosome, augmentations, experiment_attributes, chrom
 
 
 def TrainWithPolicyFitness(chromosome, augmentations, experiment_attributes, policy_id):
+    num_epochs = experiment_attributes["num_epochs"]
+    data_path = experiment_attributes["data_path"]
+    dataset = experiment_attributes["dataset"]
+    model_name = experiment_attributes["model_name"]
+    use_cpu = experiment_attributes["use_cpu"]
+
+    _, test_acc = TrainWithPolicy(policy_id, num_epochs, data_path, dataset=dataset, model_name=model_name, use_cpu=use_cpu)
+
+
+    return test_acc
+
+def RemoteTrainWithPolicyFitness(chromosome, augmentations, experiment_attributes, policy_id):
     num_epochs = experiment_attributes["num_epochs"]
     data_path = experiment_attributes["data_path"]
     dataset = experiment_attributes["dataset"]
@@ -422,7 +441,7 @@ if(__name__ == "__main__"):
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
-        "experiment_id":"test_exp_0001_20e_10p_5-2"
+        "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
         ,"num_epochs":20
         ,"data_path":data_path
         ,"dataset":"cifar10"

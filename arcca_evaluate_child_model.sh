@@ -1,5 +1,3 @@
-
-
 #!/bin/sh --login
 
 #SCW_TPN_OVERRIDE=1 #overide warning about 1 node
@@ -11,20 +9,30 @@
 #SBATCH --gres=gpu:1
 #SBATCH -p gpu
 
-#SBATCH --job-name=GA
+#SBATCH --job-name=eval_child_model
 #SBATCH -o output-%J.o
 #SBATCH -n 1
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 
+echo eval_child_model
+
 module load CUDA/9.1
-echo now load TF
 module load tensorflow
-echo tf loaded
+
+POLICY_ID=$1
+echo policy_id: "$POLICY_ID"
+
+NUM_EPOCHS=$2
+echo num_epochs: "$NUM_EPOCHS"
 
 MODEL_NAME="wrn"
-CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
+CHECKPOINT_DIR="$(pwd)/checkpoints/checkpoints_$1"
 DATA_PATH="/home/c.c0919382/datasets/cifar-10-batches-py"
 DATASET="cifar10"
+USE_CPU=0
 
-python -m GeneticAugment $DATA_PATH
+echo datapath - "$DATA_PATH"
+
+python evaluate_child_model.py -d $DATA_PATH -p $POLICY_ID -e $NUM_EPOCHS -m $MODEL_NAME -t $DATASET -c $USE_CPU
+      

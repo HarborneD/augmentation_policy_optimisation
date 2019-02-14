@@ -89,21 +89,34 @@ def build_model(inputs, num_classes, is_training, hparams):
     The logits of the image model.
   """
   scopes = setup_arg_scopes(is_training)
-  # with contextlib.nested(*scopes):
-  with contextlib.ExitStack() as stack:
-    for scp in scopes:
-        stack.enter_context(scp)
-    if hparams.model_name == 'pyramid_net':
-      logits = build_shake_drop_model(
-          inputs, num_classes, is_training)
-    elif hparams.model_name == 'wrn':
-      logits = build_wrn_model(
-          inputs, num_classes, hparams.wrn_size)
-    elif hparams.model_name == 'shake_shake':
-      logits = build_shake_shake_model(
-          inputs, num_classes, hparams, is_training)
-  return logits
 
+  #python3 vs python2 compatibility
+  try:
+    with contextlib.ExitStack() as stack:
+      for scp in scopes:
+          stack.enter_context(scp)
+      if hparams.model_name == 'pyramid_net':
+        logits = build_shake_drop_model(
+            inputs, num_classes, is_training)
+      elif hparams.model_name == 'wrn':
+        logits = build_wrn_model(
+            inputs, num_classes, hparams.wrn_size)
+      elif hparams.model_name == 'shake_shake':
+        logits = build_shake_shake_model(
+            inputs, num_classes, hparams, is_training)
+    return logits
+  except:
+    with contextlib.nested(*scopes):
+      if hparams.model_name == 'pyramid_net':
+        logits = build_shake_drop_model(
+            inputs, num_classes, is_training)
+      elif hparams.model_name == 'wrn':
+        logits = build_wrn_model(
+            inputs, num_classes, hparams.wrn_size)
+      elif hparams.model_name == 'shake_shake':
+        logits = build_shake_shake_model(
+            inputs, num_classes, hparams, is_training)
+    return logits
 
 class CifarModel(object):
   """Builds an image model for Cifar10/Cifar100."""
