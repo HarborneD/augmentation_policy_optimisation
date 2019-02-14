@@ -25,9 +25,14 @@ module load CUDA/9.1
 
 source /home/c.c0919382/fyp_scw1427/genetic_augment/venv/bin/activate
 
+
+echo 1 - "$1"mo
+
 MODEL_NAME="wrn"
-CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
+CHECKPOINT_DIR="$(pwd)/checkpoints/checkpoints_$1"
 DATA_PATH="/home/c.c0919382/datasets/cifar-10-batches-py"
 DATASET="cifar10"
 
-python test_without_flags.py $DATA_PATH
+echo datapath - "$DATA_PATH"
+
+python2 test_without_flags.py $DATA_PATH
