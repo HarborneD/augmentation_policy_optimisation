@@ -32,4 +32,4 @@ DATASET="cifar10"
 
 echo datapath - "$DATA_PATH"
 
-python test_without_flags.py $DATA_PATH > log.txt
+python test_without_flags.py $DATA_PATH
