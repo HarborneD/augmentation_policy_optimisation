@@ -1,3 +1,5 @@
+print("start of file: evaluate_policies_without_flags")
+
 # Copyright 2018 The TensorFlow Authors All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +35,7 @@ from evaluator.shake_shake import build_shake_shake_model
 import tensorflow as tf
 from evaluator.wrn import build_wrn_model
 
-print("Imprted evaluate script")
+print("Imprted evaluate script dependancies")
 
 
 arg_scope = tf.contrib.framework.arg_scope

@@ -1,5 +1,8 @@
+print("start of file:test_without_flags.py")
 import tensorflow as tf
+print("imported tensorflow")
 import evaluator.evaluate_policies_without_flags
+print("imported evaluate_policies_without_flags")
 import os
 import sys
 
@@ -19,6 +22,9 @@ tf.flags.DEFINE_string('policy_id', "default_policy_0001", 'id of policy to be e
 tf.flags.DEFINE_integer('num_epochs', 2, 'Number of epochs to train model before evaluating')
 
 FLAGS = tf.flags.FLAGS
+
+print("created flags")
+
 
 def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
     print("Training with policy:"+str(policy_id))
@@ -43,7 +49,7 @@ def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_n
 
 
 if __name__ == "__main__":
-    print("This is the start of test without flags")
+    print("This is the start of __name__==__main__ block test without flags")
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
