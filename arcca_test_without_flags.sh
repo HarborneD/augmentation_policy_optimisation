@@ -24,7 +24,7 @@ module load tensorflow
 # module load tensorflow
 # echo tf loaded
 
-echo 1 - "$1"
+echo 1 - "$1"mo
 
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints/checkpoints_$1"
