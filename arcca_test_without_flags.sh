@@ -19,6 +19,10 @@ echo eval_child_model
 
 module load CUDA/9.1
 module load tensorflow
+module load pip
+
+python2 -m pip install pillow
+
 # module load pip 
 # echo now load TF
 # module load tensorflow
