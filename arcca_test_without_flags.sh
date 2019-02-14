@@ -23,9 +23,13 @@ module load CUDA/9.1
 # module load tensorflow
 # echo tf loaded
 
+echo 1 - "$1"
+
 MODEL_NAME="wrn"
 CHECKPOINT_DIR="$(pwd)/checkpoints_$1"
 DATA_PATH="/home/c.c0919382/datasets/cifar-10-batches-py"
 DATASET="cifar10"
+
+echo datapath - "$DATA_PATH"
 
 python test_without_flags.py $DATA_PATH

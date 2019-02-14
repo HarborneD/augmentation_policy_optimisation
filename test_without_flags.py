@@ -46,7 +46,7 @@ if __name__ == "__main__":
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
-    
+    print("Using data path:"+data_path)
     policy_id = "000001"
     num_epochs = 5
     model_name = "wrn"
