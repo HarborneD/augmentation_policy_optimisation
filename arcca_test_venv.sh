@@ -35,4 +35,4 @@ DATASET="cifar10"
 
 echo datapath - "$DATA_PATH"
 
-python2 test_without_flags.py $DATA_PATH
+python test_without_flags.py $DATA_PATH

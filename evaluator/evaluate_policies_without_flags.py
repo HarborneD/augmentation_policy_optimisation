@@ -20,7 +20,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-print("(after futures) start of file: evaluate_policies_without_flags")
+try:
+    # Python 2
+    xrange
+except NameError:
+    # Python 3, xrange is now named range
+    xrange = range
+
+print("(after futures)start of file: evaluate_policies_without_flags")
 
 import contextlib
 import os
@@ -82,7 +89,10 @@ def build_model(inputs, num_classes, is_training, hparams):
     The logits of the image model.
   """
   scopes = setup_arg_scopes(is_training)
-  with contextlib.nested(*scopes):
+  # with contextlib.nested(*scopes):
+  with contextlib.ExitStack() as stack:
+    for scp in scopes:
+        stack.enter_context(scp)
     if hparams.model_name == 'pyramid_net':
       logits = build_shake_drop_model(
           inputs, num_classes, is_training)
