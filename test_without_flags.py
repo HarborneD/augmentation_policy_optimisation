@@ -43,6 +43,7 @@ def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_n
 
 
 if __name__ == "__main__":
+    print("This is the start of test without flags")
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
