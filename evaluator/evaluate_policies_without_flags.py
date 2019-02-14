@@ -1,5 +1,3 @@
-print("start of file: evaluate_policies_without_flags")
-
 # Copyright 2018 The TensorFlow Authors All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +19,8 @@ print("start of file: evaluate_policies_without_flags")
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+print("(after futures) start of file: evaluate_policies_without_flags")
 
 import contextlib
 import os
