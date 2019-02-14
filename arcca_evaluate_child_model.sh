@@ -20,10 +20,10 @@ echo eval_child_model
 module load CUDA/9.1
 module load tensorflow
 
-POLICY_ID=$1
+POLICY_ID="$1"
 echo policy_id: "$POLICY_ID"
 
-NUM_EPOCHS=$2
+NUM_EPOCHS="$2"
 echo num_epochs: "$NUM_EPOCHS"
 
 MODEL_NAME="wrn"
