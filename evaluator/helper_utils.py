@@ -19,6 +19,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+
+try:
+    # Python 2
+    xrange
+except NameError:
+    # Python 3, xrange is now named range
+    xrange = range
+
 import numpy as np
 import tensorflow as tf
 
