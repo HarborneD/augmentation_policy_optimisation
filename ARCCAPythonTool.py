@@ -57,6 +57,7 @@ class ArccaTool(object):
             ,"batch_job":"sbatch"
             ,"cancel_job":"scancel"
             ,"change_directory":"cd"
+            ,"job_status":"sacct"
         }
 
         self.JOB_STATUS_CODES = None
@@ -175,6 +176,39 @@ class ArccaTool(object):
         return self.CheckJobs(user_ids=[self.credentials["username"]])
 
 
+    def CheckJobsStatuses(self, start_time="2019-01-01"):
+        status_command = self.COMMANDS["check_status"]+ " -u " + self.credentials["username"] +" --starttime="+start_time +" -X"
+        
+        _, stdout, _ = self.SendCommand(status_command)
+        status_lines = []
+        for line in stdout:
+            status_lines.append(line.strip('\n'))
+        
+        statuses = []
+        for status_line in status_lines:
+            statuses.append(self.ProcessStatusLine(line))
+            
+        return statuses
+    
+
+    def ProcessStatusLine(self,status_line):
+
+        status = None
+        
+        if(len(status_line) == 7):
+            status = {
+                "job_id":status_line[0]
+                ,"job_name":status_line[1]
+                ,"partition":status_line[2]
+                ,"account":status_line[3]
+                ,"cpu_alloc":status_line[4]
+                ,"state":status_line[5]
+                ,"exit_code":status_line[6]
+                
+                }
+
+        return status
+        
     def ProcessJobLine(self,job_line,includes_start=False):
         result = re.findall(r'([\w\[\]\-\:\.\(\)]+)', job_line)
         

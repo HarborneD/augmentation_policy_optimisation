@@ -17,6 +17,7 @@ from test_without_flags import TrainWithPolicy
 
 from ArccaGAFunctions import RemoteGATool
 
+
 ##POPULATION FITNESS CALCULATION FUNCTIONS
 
 def LocalSequential(fitness_function, policies, augmentations, experiment_attributes):
@@ -40,7 +41,7 @@ def ArccaParallel(fitness_function, policies, augmentations, experiment_attribut
     for policy_id in policy_ids:
         remote_tool.SendPolicyFile(policy_id)
 
-    remote_tool.StartGenerationTraining(policy_ids,5)
+    remote_tool.StartGenerationTraining(policy_ids,experiment_attributes["num_epochs"])
 
     remote_tool.WaitForGenerationComplete()
 
@@ -463,12 +464,12 @@ if(__name__ == "__main__"):
         data_path = sys.argv[1]
     experiment_attributes = {
         "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
-        ,"num_epochs":20
+        ,"num_epochs":5
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
         ,"use_cpu":0
-        ,"population_evaluation_function": LocalSequential
+        ,"population_evaluation_function": ArccaParallel
     }
 
 
@@ -480,7 +481,7 @@ if(__name__ == "__main__"):
     num_technqiues_per_sub_policy = 2
     num_sub_policies_per_policy = 5
     
-    population_size = 10
+    population_size = 4
 
     prob_crossover = 0.001
     prob_technique_mutate = 0.001
@@ -488,7 +489,7 @@ if(__name__ == "__main__"):
     prob_probability_mutate = 0.001
 
 
-    num_evolution_steps = 10000
+    num_evolution_steps = 2
 
     fitness_function = TrainWithPolicyFitness
     
