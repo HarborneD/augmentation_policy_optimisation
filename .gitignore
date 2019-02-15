@@ -119,3 +119,6 @@ venv.bak/
 
 #ignore SciKits
 /scikits
+
+#results
+/results

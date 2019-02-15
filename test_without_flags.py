@@ -27,6 +27,7 @@ print("created flags")
 
 
 def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
+    print(FLAGS)
     print("Training with policy:"+str(policy_id))
     
     checkpoints_dir = os.path.join(os.getcwd(),"checkpoints")

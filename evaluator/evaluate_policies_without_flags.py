@@ -27,8 +27,6 @@ except NameError:
     # Python 3, xrange is now named range
     xrange = range
 
-print("(after futures)start of file: evaluate_policies_without_flags")
-
 import contextlib
 import os
 import time
@@ -41,9 +39,6 @@ from evaluator.shake_drop import build_shake_drop_model
 from evaluator.shake_shake import build_shake_shake_model
 import tensorflow as tf
 from evaluator.wrn import build_wrn_model
-
-print("Imprted evaluate script dependancies")
-
 
 arg_scope = tf.contrib.framework.arg_scope
 
