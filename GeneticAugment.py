@@ -1,4 +1,4 @@
-from trainer import augmentation_transforms
+from evaluator import augmentation_transforms
 
 from StochasticUniversalSampler import StochasticUniversalSampler
 
@@ -10,12 +10,12 @@ import tensorflow as tf
 import evaluator.evaluate_policies_without_flags
 import os 
 import sys
-
+import time
 import json
 
 from test_without_flags import TrainWithPolicy
 
-
+from ArccaGAFunctions import RemoteGATool
 
 ##POPULATION FITNESS CALCULATION FUNCTIONS
 
@@ -29,10 +29,31 @@ def LocalSequential(fitness_function, policies, augmentations, experiment_attrib
 
 
 def ArccaParallel(fitness_function, policies, augmentations, experiment_attributes):
+    remote_tool = RemoteGATool(experiment_attributes["local_ga_directory"],experiment_attributes["remote_ga_directory"])
+
+    policy_ids = []
+    chromosome_dict = {}
+    for policy in policies:
+        policy_ids.append(policy[1])
+        chromosome_dict[policy[1]] = policy[0]
+    
+    for policy_id in policy_ids:
+        remote_tool.SendPolicyFile(policy_id)
+
+    remote_tool.StartGenerationTraining(policy_ids,5)
+
+    remote_tool.WaitForGenerationComplete()
+
+    time.sleep(2)
+    results = remote_tool.GetGenerationResults()
+
+
+
     population_fitness = []
 
-    for policy in policies:
-        population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
+    for result in results:
+        policy_id = result["policy_id"]
+        population_fitness.append( ( chromosome_dict[policy_id], result["test_accuracy"]) )
 
     return population_fitness
 
@@ -478,7 +499,9 @@ if(__name__ == "__main__"):
     
     experiment_attributes["species_attributes"] = species_attributes
 
-    
+    experiment_attributes["local_ga_directory"] = "/media/harborned/ShutUpN/repos/final_year_project/genetic_augment"
+    experiment_attributes["remote_ga_directory"] = "/home/c.c0919382/fyp_scw1427/genetic_augment"
+
     population = []
     for p_i in range(population_size):
         population.append(CreateRandomChromosome(species_attributes))
