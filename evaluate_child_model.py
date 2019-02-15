@@ -73,7 +73,7 @@ if __name__ == "__main__":
       opts, args = getopt.getopt(sys.argv[1:],"d:p:e:m:t:c:",["data_path=","policy_id=","num_epochs=","model_name","dataset","use_cpu"])
     
     except getopt.GetoptError:
-      print('evaluate_child_model.py -d <data_path> -p <policy_id> -e <num_epochs> -m <model_name> -t <dataset> -c <use_cpu>')
+      print('evaluate_child_model.py --data_path <data_path> --policy_id <policy_id> --num_epochs <num_epochs> --model_name <model_name> --dataset <dataset> --use_cpu <use_cpu>')
       sys.exit(2)
     
     #set_defaults
