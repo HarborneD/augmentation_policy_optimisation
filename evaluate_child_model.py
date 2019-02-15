@@ -66,12 +66,8 @@ def StoreResults(configuration_dict, test_accuracy):
     
 
 if __name__ == "__main__":
-    print("Argv:")
-    print(sys.argv)
-    print("")
-    
     try:
-      opts, args = getopt.getopt(sys.argv[1:],"d:p:e:mtc",["data_path=","policy_id=","num_epochs=","model_name","dataset","use_cpu"])
+      opts, args = getopt.getopt(sys.argv[1:],"",["data_path=","policy_id=","num_epochs=","model_name","dataset","use_cpu"])
     
     except getopt.GetoptError:
       print('evaluate_child_model.py --data_path <data_path> --policy_id <policy_id> --num_epochs <num_epochs> --model_name <model_name> --dataset <dataset> --use_cpu <use_cpu>')
@@ -83,17 +79,17 @@ if __name__ == "__main__":
     use_cpu = 0 
     
     for opt, arg in opts:
-        if opt in ("-d", "--data_path"):
+        if opt in ("--data_path"):
             data_path = arg
-        elif opt in ("-p", "--policy_id"):
+        elif opt in ("--policy_id"):
             policy_id = arg
-        elif opt in ("-e", "--num_epochs"):
+        elif opt in ("--num_epochs"):
             num_epochs = arg
-        elif opt in ("-m", "--model_name"):
+        elif opt in ("--model_name"):
             model_name = arg
-        elif opt in ("-t", "--dataset"):
+        elif opt in ("--dataset"):
             dataset = arg
-        elif opt in ("-c", "--use_cpu"):
+        elif opt in ("--use_cpu"):
             use_cpu = arg
    
     print("Training Child Model Using Policy: "+str(policy_id))
