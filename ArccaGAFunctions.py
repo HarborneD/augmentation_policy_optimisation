@@ -3,6 +3,8 @@ from ARCCAPythonTool import ArccaTool
 import os
 import time
 
+from simple_toolbar import ProgressBar
+
 class RemoteGATool(object):
     def __init__(self,local_ga_dir,remote_ga_dir,host="hawklogin.cf.ac.uk"):
         self.local_ga_directory = local_ga_dir
@@ -74,7 +76,7 @@ class RemoteGATool(object):
         #         ,"nodes":result[6]
         #         ,"nodelist":result[7]
         #         }
-        job_queue = remote_tool.arcca_tool.CheckJobs(job_ids=self.PolicyListToJobList(remote_tool.current_generation))
+        job_queue = self.arcca_tool.CheckJobs(job_ids=self.PolicyListToJobList(self.current_generation))
 
         jobs = []
         for job_line in job_queue[1:]:
@@ -90,14 +92,22 @@ class RemoteGATool(object):
 
 
     def WaitForGenerationComplete(self):
+        num_jobs = len(self.current_generation)
+
+        progress = ProgressBar(num_jobs, width=20, fmt=ProgressBar.FULL)
+
         while len(self.running_jobs_of_generation) > 0:
             self.UpdateCurrentGenerationJobs()
-            print("Waiting for jobs:")
+            jobs_strings=""
             for job_id in self.running_jobs_of_generation:
                 policy_id = self.job_map[job_id]
-                print(str(job_id)+ " ("+policy_id+") - "+self.training_tracker[policy_id]["last_known_status"]) 
+                jobs_strings+= str(job_id)+","
+            jobs_strings = jobs_strings[:-1] 
+            progress.current = num_jobs - len(self.running_jobs_of_generation)
+            progress(jobs_strings)
             time.sleep(5)
-    
+        progress.done()
+        
 
     def ReadResultsFile(self,local_file_path):
         results_headings = ["policy_id","num_epochs","model_name","dataset","use_cpu","time_taken"]
@@ -117,7 +127,7 @@ class RemoteGATool(object):
         for results_heading_i in range(len(results_headings)):
             result[results_headings[results_heading_i]] = result_split[results_heading_i]
         
-        result["test_accuracy"] = result_split[-1]
+        result["test_accuracy"] = float(result_split[-1])
         
         return result
 
