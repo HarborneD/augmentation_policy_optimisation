@@ -1,8 +1,5 @@
-print("start of file:test_without_flags.py")
 import tensorflow as tf
-print("imported tensorflow")
 import evaluator.evaluate_policies_without_flags
-print("imported evaluate_policies_without_flags")
 import os
 import sys
 
@@ -23,11 +20,8 @@ tf.flags.DEFINE_integer('num_epochs', 2, 'Number of epochs to train model before
 
 FLAGS = tf.flags.FLAGS
 
-print("created flags")
-
 
 def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
-    print(FLAGS)
     print("Training with policy:"+str(policy_id))
     
     checkpoints_dir = os.path.join(os.getcwd(),"checkpoints")
