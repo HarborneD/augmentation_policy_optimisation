@@ -122,3 +122,6 @@ venv.bak/
 
 #results
 /results
+
+#credentials
+credentials.json
