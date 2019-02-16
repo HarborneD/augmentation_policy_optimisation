@@ -129,3 +129,6 @@ credentials.json
 
 #previous generation storage
 /previous_generation
+
+bfg.jar
+*bfg*
