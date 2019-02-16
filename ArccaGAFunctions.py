@@ -148,6 +148,31 @@ class RemoteGATool(object):
                 print("Policy Failed: "+ policy_id)
                 print("")
         return results
+    
+
+    def CleanDirectoriesAndStoreCurrentGen(self,policy_ids):
+        previous_generation_path = os.path.join(self.remote_ga_directory,"previous_generation")
+
+        #clean previous_generation folders
+        self.CleanPreviousGeneration(previous_generation_path)
+        
+        #copy current generations to previous_generation folders
+        self.CopyCurrentGenerationToPreviousGenerationFolder(policy_ids,previous_generation_path)
+        
+        #clean main directories
+        self.CleanCurrentGeneration(policy_ids)
+
+
+    def CleanPreviousGeneration(self,previous_generation_path):
+        pass
+
+
+    def CopyCurrentGenerationToPreviousGenerationFolder(self,policy_ids,previous_generation_path):
+        pass
+
+
+    def CleanCurrentGeneration(self,policy_ids):
+        pass
 
 
 
