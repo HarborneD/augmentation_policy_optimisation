@@ -9,6 +9,7 @@ import re
 import thread
 import time
 
+import stat
 
 
 ### Connection
@@ -372,7 +373,75 @@ class ArccaTool(object):
         self.sftp.get(source_path, destination_path)
 
 
+    def ListRemoteDir(self, path):
+        return self.sftp.listdir(path)
 
+    def CheckPathExists(self, path):
+        try:
+            self.sftp.stat(path)
+        except IOError, e:
+            if e[0] == 2:
+                return False
+            raise
+        else:
+            return True
+    
+
+    def CreateFolder(self,path):
+        self.sftp.mkdir(path)
+
+
+    def MoveRemoteFile(self, remote_source, remote_destination):
+        self.sftp.rename(remote_source,remote_destination)
+
+    
+    def MoveRemoteDirectory(self, remote_source, remote_destination):
+        if(not self.CheckPathExists(remote_destination)):
+            self.CreateFolder(remote_destination)
+        
+        contents = self.ListRemoteDir(remote_source)
+
+        for item in contents:
+            source_item_path = os.path.join(remote_source,item)
+            destination_item_path = os.path.join(remote_destination,item)
+
+            if(self.CheckRemotePathIsDirectory(source_item_path)):
+                self.MoveRemoteDirectory(source_item_path,destination_item_path)
+            else:
+                self.MoveRemoteFile(source_item_path,destination_item_path)
+        
+        self.RemoveRemoteDirectory(remote_source)
+
+    def CheckRemotePathIsDirectory(self,path):
+        fileattr = self.sftp.lstat(path)
+        if stat.S_ISDIR(fileattr.st_mode):
+            return True
+        if stat.S_ISREG(fileattr.st_mode):
+            return False 
+
+
+    def RemoveRemoteDirectory(self,path):
+        items_in_dir = self.ListRemoteDir(path)
+
+        for item in items_in_dir:
+            item_path = os.path.join(path, item)
+            if(self.CheckRemotePathIsDirectory(item_path)):
+                self.RemoveRemoteDirectory(item_path)
+            else:
+                self.DeleteRemoteFile(item_path)    
+
+        self.sftp.rmdir(path)    
+    
+
+    def DeleteRemoteFile(self,path):
+        self.sftp.remove(path)
+
+
+    def RemoveRemoteItem(self,path):
+        if(self.CheckRemotePathIsDirectory(path)):
+            self.RemoveRemoteDirectory(path)
+        else:
+            self.DeleteRemoteFile(path)
 
     #### destructor
     def __del__(self):
