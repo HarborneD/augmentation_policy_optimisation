@@ -125,7 +125,7 @@ venv.bak/
 /results_to_keep
 
 #credentials
-credentials.json
+#credentials.json
 
 #previous generation storage
 /previous_generation
