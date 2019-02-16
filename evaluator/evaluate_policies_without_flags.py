@@ -184,7 +184,7 @@ class CifarModel(object):
     # Setup checkpointing for this child model
     # Keep 2 or more checkpoints around during training.
     with tf.device('/cpu:0'):
-      self.saver = tf.train.Saver(max_to_keep=2)
+      self.saver = tf.train.Saver(tf.trainable_variables(),max_to_keep=1)
 
     self.init = tf.group(tf.global_variables_initializer(),
                          tf.local_variables_initializer())
@@ -244,6 +244,7 @@ class CifarModelTrainer(object):
       step: If provided, creates a checkpoint with the given step
         number, instead of overwriting the existing checkpoints.
     """
+    return
     model_save_name = os.path.join(self.model_dir, 'model.ckpt')
     if not tf.gfile.IsDirectory(self.model_dir):
       tf.gfile.MakeDirs(self.model_dir)
@@ -404,13 +405,14 @@ class CifarModelTrainer(object):
         # training_accuracy = self._run_training_loop(m, curr_epoch)
         train_accuracy = helper_utils.run_epoch_training(self._session, m, self.data_loader, curr_epoch)
 
-        if(curr_epoch == hparams.num_epochs-1):
-          self.save_model(step=curr_epoch)
+        #TODO:add saving model back in
+        # if(curr_epoch == hparams.num_epochs-1):
+        #    self.save_model(step=curr_epoch)
 
       valid_accuracy, test_accuracy = self._compute_final_accuracies(meval)
-
+      
     tf.logging.info('Train Acc: {}    Valid Acc: {}     Test Acc: {}'.format(training_accuracy, valid_accuracy, test_accuracy))
-
+    
     return valid_accuracy, test_accuracy
 
   @property

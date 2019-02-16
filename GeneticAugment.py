@@ -459,20 +459,24 @@ def LogGeneration(experiment_id,generation_stats):
 
 
 if(__name__ == "__main__"):
+    train_remotely = False
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
         "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
-        ,"num_epochs":5
+        ,"num_epochs":1
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
         ,"use_cpu":0
-        ,"population_evaluation_function": ArccaParallel
+        
     }
 
-
+    if(train_remotely):
+        experiment_attributes["population_evaluation_function"] = ArccaParallel
+    else:
+        experiment_attributes["population_evaluation_function"] = LocalSequential
 
     augmentation_list = list(augmentation_transforms.TRANSFORM_NAMES)
     print("")
@@ -489,7 +493,7 @@ if(__name__ == "__main__"):
     prob_probability_mutate = 0.001
 
 
-    num_evolution_steps = 2
+    num_evolution_steps = 100
 
     fitness_function = TrainWithPolicyFitness
     
