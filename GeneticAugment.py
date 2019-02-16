@@ -61,6 +61,9 @@ def ArccaParallel(fitness_function, policies, augmentations, experiment_attribut
         policy_id = result["policy_id"]
         population_fitness.append( ( chromosome_dict[policy_id], result["test_accuracy"]) )
 
+    if(experiment_attributes["clean_directories"]):
+        remote_tool.CleanDirectoriesAndStoreCurrentGen(policy_ids)
+
     return population_fitness
 
 
@@ -528,13 +531,13 @@ def CleanLocalCurrentGeneration(policy_ids):
         os.remove(policy_path)
         
 if(__name__ == "__main__"):
-    train_remote = False
+    train_remote = True
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
         "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
-        ,"num_epochs":1
+        ,"num_epochs":20
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
@@ -557,7 +560,7 @@ if(__name__ == "__main__"):
     num_technqiues_per_sub_policy = 2
     num_sub_policies_per_policy = 5
     
-    population_size = 4
+    population_size = 10
 
     prob_crossover = 0.001
     prob_technique_mutate = 0.001
@@ -565,7 +568,7 @@ if(__name__ == "__main__"):
     prob_probability_mutate = 0.001
 
 
-    num_evolution_steps = 2
+    num_evolution_steps = 100
 
     fitness_function = TrainWithPolicyFitness
     

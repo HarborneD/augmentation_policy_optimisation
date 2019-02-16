@@ -5,6 +5,8 @@ import time
 
 from simple_toolbar import ProgressBar
 
+import shutil
+
 class RemoteGATool(object):
     def __init__(self,local_ga_dir,remote_ga_dir,host="hawklogin.cf.ac.uk"):
         self.local_ga_directory = local_ga_dir
@@ -153,26 +155,54 @@ class RemoteGATool(object):
     def CleanDirectoriesAndStoreCurrentGen(self,policy_ids):
         previous_generation_path = os.path.join(self.remote_ga_directory,"previous_generation")
 
+        if(not self.arcca_tool.CheckPathExists(previous_generation_path)):
+            self.arcca_tool.CreateFolder(previous_generation_path)
+
         #clean previous_generation folders
         self.CleanPreviousGeneration(previous_generation_path)
         
         #copy current generations to previous_generation folders
-        self.CopyCurrentGenerationToPreviousGenerationFolder(policy_ids,previous_generation_path)
+        self.MoveCurrentGenerationToPreviousGenerationFolder(policy_ids,previous_generation_path)
         
-        #clean main directories
-        self.CleanCurrentGeneration(policy_ids)
-
 
     def CleanPreviousGeneration(self,previous_generation_path):
-        pass
+        previous_checkpoints_path = os.path.join(previous_generation_path, "checkpoints")
+        
+        if(not self.arcca_tool.CheckPathExists(previous_checkpoints_path)):
+            self.arcca_tool.CreateFolder(previous_checkpoints_path)
+            
+        checkpoints = self.arcca_tool.ListRemoteDir(previous_checkpoints_path)
+        for checkpoint in checkpoints:
+            checkpoint_path = os.path.join(previous_checkpoints_path,checkpoint)
+            self.arcca_tool.RemoveRemoteItem(checkpoint_path)
+        
+        previous_policies_path = os.path.join(previous_generation_path, "policies")
+        if(not self.arcca_tool.CheckPathExists(previous_policies_path)):
+            self.arcca_tool.CreateFolder(previous_policies_path)
+        
+        policies = self.arcca_tool.ListRemoteDir(previous_policies_path)
+        for policy in policies:
+            policy_path = os.path.join(previous_policies_path,policy)
+            self.arcca_tool.RemoveRemoteItem(policy_path)
+        
 
 
-    def CopyCurrentGenerationToPreviousGenerationFolder(self,policy_ids,previous_generation_path):
-        pass
+    def MoveCurrentGenerationToPreviousGenerationFolder(self,policy_ids,previous_generation_path):
+        checkpoints_dir = os.path.join(self.remote_ga_directory,"checkpoints")
+        policies_dir = os.path.join(self.remote_ga_directory,"policies")
 
+        previous_checkpoints_path = os.path.join(previous_generation_path, "checkpoints")
+        previous_policies_path = os.path.join(previous_generation_path, "policies")
+        
+        for policy_id in policy_ids:
+            checkpoint_path = os.path.join(checkpoints_dir,"checkpoints_"+policy_id)
+            policy_path = os.path.join(policies_dir,policy_id+".json")
 
-    def CleanCurrentGeneration(self,policy_ids):
-        pass
+            checkpoint_output_path = os.path.join(previous_checkpoints_path,"checkpoints_"+policy_id)
+            policy_output_path = os.path.join(previous_policies_path,policy_id+".json")
+
+            self.arcca_tool.MoveRemoteDirectory(checkpoint_path,checkpoint_output_path)
+            self.arcca_tool.MoveRemoteFile(policy_path,policy_output_path)
 
 
 
