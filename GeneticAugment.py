@@ -12,6 +12,7 @@ import os
 import sys
 import time
 import json
+import shutil
 
 from test_without_flags import TrainWithPolicy
 
@@ -23,8 +24,12 @@ from ArccaGAFunctions import RemoteGATool
 def LocalSequential(fitness_function, policies, augmentations, experiment_attributes):
     population_fitness = []
 
-    for policy in policies:
-        population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
+    # for policy in policies:
+    #     population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
+
+    
+    if(experiment_attributes["clean_directories"]):
+        LocalCleanDirectoriesAndStoreCurrentGen([p[1] for p in policies])
 
     return population_fitness
 
@@ -456,8 +461,72 @@ def LogGeneration(experiment_id,generation_stats):
         f.write(generation_string)
 
 
+def LocalCleanDirectoriesAndStoreCurrentGen(policy_ids):
+    previous_generation_path = "previous_generation"
+
+    if(not os.path.exists(previous_generation_path)):
+        os.mkdir(previous_generation_path)
+
+    #clean previous_generation folders
+    CleanLocalPreviousGeneration(previous_generation_path)
+    
+    #copy current generations to previous_generation folders
+    CopyLocalCurrentGenerationToPreviousGenerationFolder(policy_ids,previous_generation_path)
+    
+    #clean main directories
+    CleanLocalCurrentGeneration(policy_ids)
 
 
+def CleanLocalPreviousGeneration(previous_generation_path):
+    previous_checkpoints_path = os.path.join(previous_generation_path, "checkpoints")
+    if(not os.path.exists(previous_checkpoints_path)):
+        os.mkdir(previous_checkpoints_path)
+
+    checkpoints = os.listdir(previous_checkpoints_path)
+    for checkpoint in checkpoints:
+        checkpoint_path = os.path.join(previous_checkpoints_path,checkpoint)
+        shutil.rmtree(checkpoint_path)
+
+
+    previous_policies_path = os.path.join(previous_generation_path, "policies")
+    if(not os.path.exists(previous_policies_path)):
+        os.mkdir(previous_policies_path)
+
+    policies = os.listdir(previous_policies_path)
+    for policy in policies:
+        policy_path = os.path.join(previous_policies_path,policy)
+        os.remove(policy_path)
+
+
+def CopyLocalCurrentGenerationToPreviousGenerationFolder(policy_ids,previous_generation_path):
+    checkpoints_dir = "checkpoints"
+    policies_dir = "policies"
+
+    previous_checkpoints_path = os.path.join(previous_generation_path, "checkpoints")
+    previous_policies_path = os.path.join(previous_generation_path, "policies")
+    
+    for policy_id in policy_ids:
+        checkpoint_path = os.path.join(checkpoints_dir,"checkpoints_"+policy_id)
+        policy_path = os.path.join(policies_dir,policy_id+".json")
+
+        checkpoint_output_path = os.path.join(previous_checkpoints_path,"checkpoints_"+policy_id)
+        policy_output_path = os.path.join(previous_policies_path,policy_id+".json")
+
+        shutil.copytree(checkpoint_path,checkpoint_output_path)
+        shutil.copy(policy_path,policy_output_path)
+
+
+def CleanLocalCurrentGeneration(policy_ids):
+    checkpoints_dir = "checkpoints"
+    policies_dir = "policies"
+
+    for policy_id in policy_ids:
+        checkpoint_path = os.path.join(checkpoints_dir,"checkpoints_"+policy_id)
+        policy_path = os.path.join(policies_dir,policy_id+".json")
+
+        shutil.rmtree(checkpoint_path)
+        os.remove(policy_path)
+        
 if(__name__ == "__main__"):
     train_remote = False
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
@@ -465,17 +534,20 @@ if(__name__ == "__main__"):
         data_path = sys.argv[1]
     experiment_attributes = {
         "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
-        ,"num_epochs":5
+        ,"num_epochs":1
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
         ,"use_cpu":0
+        ,"clean_directories":True
        
     }
 
     if(train_remote):
+        print("Training Remotely")
         experiment_attributes["population_evaluation_function"] = ArccaParallel
     else:
+        print("Training Locally")
         experiment_attributes["population_evaluation_function"] = LocalSequential
 
     augmentation_list = list(augmentation_transforms.TRANSFORM_NAMES)
@@ -511,12 +583,6 @@ if(__name__ == "__main__"):
     for p_i in range(population_size):
         population.append(CreateRandomChromosome(species_attributes))
     
-
-    # for p in population:
-    #     print(p)
-
-    # print("bbbbb")
-
 
     for step in range(num_evolution_steps):
         print("____")
@@ -566,6 +632,3 @@ if(__name__ == "__main__"):
 
 # print("fffff")
 
-
-print(population[0])
-print(fitness_function(population[0], augmentation_list,experiment_attributes, "post_evolution_test_1"))
