@@ -459,13 +459,13 @@ def LogGeneration(experiment_id,generation_stats):
 
 
 if(__name__ == "__main__"):
-    train_remotely = False
+    train_remotely = True
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
-        "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
-        ,"num_epochs":1
+        "experiment_id":"remote_exp_nosave_0001_20e_10p_5-2"
+        ,"num_epochs":20
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
@@ -485,7 +485,7 @@ if(__name__ == "__main__"):
     num_technqiues_per_sub_policy = 2
     num_sub_policies_per_policy = 5
     
-    population_size = 4
+    population_size = 10
 
     prob_crossover = 0.001
     prob_technique_mutate = 0.001
