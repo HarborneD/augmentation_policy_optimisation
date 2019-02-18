@@ -49,8 +49,8 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     print("Using data path:"+data_path)
-    policy_id = "000001"
-    num_epochs = 5
+    policy_id = "000proposed_policy"
+    num_epochs = 200
     model_name = "wrn"
     data_path = data_path
     dataset = "cifar10"

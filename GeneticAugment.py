@@ -24,8 +24,8 @@ from ArccaGAFunctions import RemoteGATool
 def LocalSequential(fitness_function, policies, augmentations, experiment_attributes):
     population_fitness = []
 
-    # for policy in policies:
-    #     population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
+    for policy in policies:
+        population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
 
     
     if(experiment_attributes["clean_directories"]):
@@ -131,7 +131,7 @@ def TestFitness(chromosome, augmentations, experiment_attributes, policy_id):
     policy_val = 0
     for s_i in range(experiment_attributes["species_attributes"]["num_sub_policies"]):
         techniques = []
-        for t_i in range(experiment_attributes["species_attributes"]["num_technqiues"]):
+        for t_i in range(experiment_attributes["species_attributes"]["num_techniques"]):
             tech, _, _, _ = FetchTechniqueFromLocalIndex(chromosome,t_i,s_i,experiment_attributes["species_attributes"])
             techniques.append( tech )
         
@@ -152,7 +152,7 @@ def TestFitness2(chromosome, augmentations, experiment_attributes, policy_id):
     policy_val = 0
     for s_i in range(experiment_attributes["species_attributes"]["num_sub_policies"]):
         techniques = []
-        for t_i in range(experiment_attributes["species_attributes"]["num_technqiues"]):
+        for t_i in range(experiment_attributes["species_attributes"]["num_techniques"]):
             tech, _, _, _ = FetchTechniqueFromLocalIndex(chromosome,t_i,s_i,experiment_attributes["species_attributes"])
             techniques.append( tech )
         
@@ -182,25 +182,25 @@ def CrossoverPolicy(chromosome_1,chromosome_2,prob_crossover,species_attributes)
 
 def MutateTechnique(chromosome, prob_technique_mutate,species_attributes):
     for s_i in range(species_attributes["num_sub_policies"]):
-        for t_i in range(species_attributes["num_technqiues"]):
+        for t_i in range(species_attributes["num_techniques"]):
             if(random.random() < prob_technique_mutate):
                 
-                current_technique, t_global_i, t_probability_global_i, t_magnitude_global_i = FetchTechniqueFromLocalIndex(chromosome,t_i, s_i,species_attributes)
+                current_technique, t_global_i, _, _ = FetchTechniqueFromLocalIndex(chromosome,t_i, s_i,species_attributes)
                 current_augmentation_local_i = current_technique[0].index(1.0)
 
                 new_augmentation_local_i = current_augmentation_local_i
                 while(new_augmentation_local_i == current_augmentation_local_i):
                     new_augmentation_local_i = random.randint(0,species_attributes["num_augmentations"]-1)
                 
-                chromosome[t_global_i+current_augmentation_local_i] = 0
-                chromosome[t_global_i+new_augmentation_local_i] = 1
+                chromosome[t_global_i+current_augmentation_local_i] = 0.0
+                chromosome[t_global_i+new_augmentation_local_i] = 1.0
 
     return chromosome
 
         
 def MutateMagnitude(chromosome,prob_magnitude_mutate,species_attributes):
     for s_i in range(species_attributes["num_sub_policies"]):
-        for t_i in range(species_attributes["num_technqiues"]):
+        for t_i in range(species_attributes["num_techniques"]):
             if(random.random() < prob_magnitude_mutate):
                 global_magnitude_i = MapLocalMagnitudeIndexsToGlobalInChromosome(t_i, s_i, species_attributes)
 
@@ -221,36 +221,123 @@ def MutateMagnitude(chromosome,prob_magnitude_mutate,species_attributes):
 
 def MutateProbability(chromosome,prob_probability_mutate,species_attributes):
     for s_i in range(species_attributes["num_sub_policies"]):
-        for t_i in range(species_attributes["num_technqiues"]):
+        for t_i in range(species_attributes["num_techniques"]):
             if(random.random() < prob_magnitude_mutate):
-                global_magnitude_i = MapLocalProbabilityIndexsToGlobalInChromosome(t_i, s_i, species_attributes)
+                global_probability_i = MapLocalProbabilityIndexsToGlobalInChromosome(t_i, s_i, species_attributes)
 
                 probability_possibilities = []
-                current_probability = chromosome[global_magnitude_i]
+                current_probability = chromosome[global_probability_i]
                 if(current_probability >= 0.1):
                     probability_possibilities.append(current_probability-0.1)
 
                 if(current_probability <= 0.9):
                     probability_possibilities.append(current_probability+0.1)
                 
-                new_magnitude = random.choice(probability_possibilities)
+                new_probability = random.choice(probability_possibilities)
 
-                chromosome[global_magnitude_i] = new_magnitude
+                chromosome[global_probability_i] = new_probability
     
     return chromosome
+
+
+def CreateNeighbour(chromosome,species_attributes, change_sub_policy_i = -1, change_technique_i=-1, neighbourhood_move_func = None , new_val =-1):
+    if(change_sub_policy_i == -1):
+        change_sub_policy_i = random.randint(0,species_attributes["num_sub_policies"]-1)
+    
+    if(change_technique_i == -1):
+        change_technique_i = random.randint(0,species_attributes["num_techniques"]-1)
+    
+    if(neighbourhood_move_func is None):
+        neighbourhood_move_func = random.choice([NeighbourByTechnique,NeighbourByMagnitude,NeighbourByProbability]) 
+
+    return neighbourhood_move_func(chromosome,change_sub_policy_i,change_technique_i,species_attributes,new_val)
+    
+
+
+def NeighbourByTechnique(chromosome, s_i, t_i,species_attributes,new_val=-1):
+    current_technique, t_global_i, _, _ = FetchTechniqueFromLocalIndex(chromosome,t_i, s_i,species_attributes)
+    current_augmentation_local_i = current_technique[0].index(1.0)
+
+    if(new_val != -1):
+        new_augmentation_local_i = new_val
+    else:
+        new_augmentation_local_i = current_augmentation_local_i
+        while(new_augmentation_local_i == current_augmentation_local_i):
+            new_augmentation_local_i = random.randint(0,species_attributes["num_augmentations"]-1)
+        
+    chromosome[t_global_i+current_augmentation_local_i] = 0.0
+    chromosome[t_global_i+new_augmentation_local_i] = 1.0
+
+    return chromosome
+
+
+def NeighbourByProbability(chromosome, s_i, t_i,species_attributes,new_val=-1):
+    global_probability_i = MapLocalProbabilityIndexsToGlobalInChromosome(t_i, s_i, species_attributes)
+
+    if(new_val != -1):
+        new_probability = new_val
+    else:
+        probability_possibilities = []
+        current_probability = chromosome[global_probability_i]
+        if(current_probability >= 0.1):
+            probability_possibilities.append(current_probability-0.1)
+
+        if(current_probability <= 0.9):
+            probability_possibilities.append(current_probability+0.1)
+
+        new_probability = random.choice(probability_possibilities)
+
+    chromosome[global_probability_i] = new_probability
+
+    return chromosome
+
+
+def NeighbourByMagnitude(chromosome, s_i, t_i,species_attributes,new_val=-1):
+    global_magnitude_i = MapLocalMagnitudeIndexsToGlobalInChromosome(t_i, s_i, species_attributes)
+
+    if(new_val != -1):
+        new_magnitude = new_val
+    else:
+        magnitude_possibilities = []
+        current_magnitude = chromosome[global_magnitude_i]
+        if(current_magnitude >= 0.1):
+            magnitude_possibilities.append(current_magnitude-0.1)
+
+        if(current_magnitude <= 0.8):
+            magnitude_possibilities.append(current_magnitude+0.1)
+        
+        new_magnitude = random.choice(magnitude_possibilities)
+
+    chromosome[global_magnitude_i] = new_magnitude
+
+    return chromosome
+
+
+def CreateNeighboursFromChromosome(num_neighbours, chromosome, species_attributes ):
+    neighbours_list = []
+
+    for n_i in range(num_neighbours):
+        neighbour = CreateNeighbour(chromosome,species_attributes)
+        neighbours_list.append(neighbour)
+    
+    return neighbours_list
+
 
 
 
 
 ###MAPPING and FORMATTING FUNCTIONS
 def MapLocalAugmentationIndexsToGlobalInChromosome(augmentation_i, technique_i, sub_policy_i, species_attributes):
-    return augmentation_i + (species_attributes["num_augmentations"]* technique_i) + (species_attributes["sub_policy_size"] * sub_policy_i)
+    #jump to right sub policy + jump to the right technique vector + find the augmentation bit
+    return (species_attributes["sub_policy_size"] * sub_policy_i) + (species_attributes["num_augmentations"]* technique_i) + augmentation_i
 
 def MapLocalProbabilityIndexsToGlobalInChromosome(technique_i, sub_policy_i, species_attributes):
+    #jump to right sub policy + jump over the technique vectors + jump to the right probability
     return  (species_attributes["sub_policy_size"] * sub_policy_i) + species_attributes["total_sp_one_hot_elements"] + technique_i 
 
 def MapLocalMagnitudeIndexsToGlobalInChromosome(technique_i, sub_policy_i, species_attributes):
-    return  (species_attributes["sub_policy_size"] * sub_policy_i) + species_attributes["total_sp_one_hot_elements"] + species_attributes["num_technqiues"] + technique_i 
+    #jump to right sub policy + jump over the technique vectors + jump over the probability floats + jump to the right magnitude
+    return  (species_attributes["sub_policy_size"] * sub_policy_i) + species_attributes["total_sp_one_hot_elements"] + species_attributes["num_techniques"] + technique_i 
 
 
 def FetchTechniqueFromLocalIndex(chromosome, technique_i, sub_policy_i, species_attributes):
@@ -283,7 +370,7 @@ def PolicyChromosomeToSubPoliciesList(chromosome, augmentations, species_attribu
     for s_i in range(species_attributes["num_sub_policies"]):
         selected_augmentations = []
         techniques = []
-        for t_i in range(species_attributes["num_technqiues"]):
+        for t_i in range(species_attributes["num_techniques"]):
             tech, _, _, _ = FetchTechniqueFromLocalIndex(chromosome,t_i,s_i,species_attributes)
             techniques.append(tech[:])
         
@@ -297,7 +384,7 @@ def PolicyChromosomeToSubPoliciesList(chromosome, augmentations, species_attribu
 
 def StorePolicyAsJson(policy_id, policy_list, policy_directory):
     policy_json = PolicyListToPolicyJSON(policy_list,policy_id)
-
+    
     policy_json_path = os.path.join(policy_directory, policy_id+".json")
     with open(policy_json_path, "w") as f:
         f.write(policy_json)
@@ -319,19 +406,43 @@ def PolicyListToPolicyJSON(policy_list, policy_id):
     return policy_json_string
     
 
+def PolicyJsonToChromosome(policy_json,augmentation_list,species_attributes):
+    loaded_chromosome = BuildBlankPolicyChromosome(species_attributes)
+
+    policy_dict = policy_json["policy"]
+
+    num_subpolicies_in_json = len(policy_dict["policy"])
+    num_techniques_in_json = len(policy_dict["policy"][0])
+
+    for sub_policy_i in range(num_subpolicies_in_json):
+        sub_policy_list = policy_dict["policy"][sub_policy_i]
+        for technique_i in range(num_techniques_in_json):
+            augmentation_i = augmentation_list.index(sub_policy_list[technique_i][0])
+            global_augmentation_i = MapLocalAugmentationIndexsToGlobalInChromosome(augmentation_i, technique_i, sub_policy_i, species_attributes)
+            loaded_chromosome[global_augmentation_i] = 1.0
+
+            global_probability_i = MapLocalProbabilityIndexsToGlobalInChromosome(technique_i, sub_policy_i, species_attributes)
+            loaded_chromosome[global_probability_i] = float(sub_policy_list[technique_i][1])
+
+            global_magnitude_i = MapLocalMagnitudeIndexsToGlobalInChromosome(technique_i, sub_policy_i, species_attributes)
+            loaded_chromosome[global_magnitude_i] = float(sub_policy_list[technique_i][2])/10
+    
+    return loaded_chromosome
 
 
 ##GENERATE CHOMOSOME FUNCTIONS
 def BuildBlankPolicyChromosome(species_attributes):
     # format: [ [one hot encoded technique]*num_technique + [probabilities]*num_technique + [magnitude]*num_technique ] *num_sub_policies
-    # EG:   [1000000 0100000 0.1 0.6  0010000 0100000 0.0 0.5   0000001 0100000 0.7 0.1] (one hot encodings are also floats but represented as ints for readability)
+    # EG:   [1000000 0100000  0.1 0.6  0.1 0.6   1000000 0100000  0.1 0.6  0.1 0.6   1000000 0100000  0.1 0.6  0.1 0.6] (one hot encodings are also floats but represented as ints for readability)
+    # EG:   [T11 T12          P11 P12  M11 M12   T21     T22      P21 P22  M21 M22   T31     T32      P31 P32  M31 M32]
+    # EG:   [|            ^Sub Policy 1^     |   |                ^S2^            |  |               ^S3^            |]
     return [0.0] * (species_attributes["sub_policy_size"] * species_attributes["num_sub_policies"])   
     
 
 def CreateRandomChromosome(species_attributes):
     chromosome = BuildBlankPolicyChromosome(species_attributes)
     for s_i in range(species_attributes["num_sub_policies"]):
-        for t_i in range(species_attributes["num_technqiues"]):
+        for t_i in range(species_attributes["num_techniques"]):
             augmentation_i = random.randint(0,species_attributes["num_augmentations"]-1)
             chromosome[ MapLocalAugmentationIndexsToGlobalInChromosome(augmentation_i, t_i, s_i, species_attributes) ] = 1.0
 
@@ -344,6 +455,47 @@ def CreateRandomChromosome(species_attributes):
     return chromosome
 
 
+def GenerateStartingPoliciesFromSplittingPaperPolicy(population_size,augmentation_list,species_attributes):
+    #Splits the 25 sub_policies of the paper policy in to policies of 5 sub-policies and generates neighbours of those
+    #requires policies to be 5 sub-policies of 2 techniques
+
+    paper_policy_path = "autoaugment_paper_cifar10.json"
+
+    paper_policy_json = None
+
+    with open(paper_policy_path, "r") as f:
+        policy_string = f.read()
+        paper_policy_json = json.loads(policy_string)
+
+    paper_chromosome = PolicyJsonToChromosome(paper_policy_json,augmentation_list,species_attributes)
+
+    policies = [paper_chromosome]
+
+
+    policies += CreateNeighboursFromChromosome(population_size-1, paper_chromosome, species_attributes)
+
+    return policies
+
+
+def GenerateStartingPoliciesFromPaperPolicy(population_size,augmentation_list,species_attributes):
+    #requires policies to be 25 sub-policies of 2 techniques
+
+    paper_policy_path = "autoaugment_paper_cifar10.json"
+
+    paper_policy_json = None
+
+    with open(paper_policy_path, "r") as f:
+        policy_string = f.read()
+        paper_policy_json = json.loads(policy_string)
+
+    paper_chromosome = PolicyJsonToChromosome(paper_policy_json,augmentation_list,species_attributes)
+
+    policies = [paper_chromosome]
+
+
+    policies += CreateNeighboursFromChromosome(population_size-1, paper_chromosome, species_attributes)
+
+    return policies
 
 
 
@@ -430,14 +582,14 @@ def MoveToNextGeneration(population_fitness, evolution_probabilities, species_at
 
 
 #ATTRIBUTE DICTIONARY FUNCTIONS
-def CreateSpeciesAttributeDict(population_size, num_augmentations, num_technqiues_per_sub_policy, num_sub_policies_per_policy):
+def CreateSpeciesAttributeDict(population_size, num_augmentations, num_techniques_per_sub_policy, num_sub_policies_per_policy):
     return {
         "population_size": population_size,
         "num_augmentations":num_augmentations,
-        "num_technqiues":num_technqiues_per_sub_policy,
+        "num_techniques":num_techniques_per_sub_policy,
         "num_sub_policies":num_sub_policies_per_policy,
-        "sub_policy_size":(num_augmentations + 2)* num_technqiues_per_sub_policy,
-        "total_sp_one_hot_elements":num_augmentations * num_technqiues_per_sub_policy
+        "sub_policy_size":(num_augmentations + 2)* num_techniques_per_sub_policy,
+        "total_sp_one_hot_elements":num_augmentations * num_techniques_per_sub_policy
     }
 
 
@@ -529,14 +681,18 @@ def CleanLocalCurrentGeneration(policy_ids):
 
         shutil.rmtree(checkpoint_path)
         os.remove(policy_path)
+
+
         
 if(__name__ == "__main__"):
     train_remote = True
+    autoaugment_based_population = True
+
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
-        "experiment_id":"test_remote_exp_0001_20e_10p_5-2"
+        "experiment_id":"AutoAugmentBasedPopulation_exp_0001_20e_10p_25-2"
         ,"num_epochs":20
         ,"data_path":data_path
         ,"dataset":"cifar10"
@@ -557,15 +713,15 @@ if(__name__ == "__main__"):
     print("")
     print("number of augmentations: ", len(augmentation_list))
     print("")
-    num_technqiues_per_sub_policy = 2
-    num_sub_policies_per_policy = 5
+    num_techniques_per_sub_policy = 2
+    num_sub_policies_per_policy = 25
     
     population_size = 10
 
     prob_crossover = 0.001
-    prob_technique_mutate = 0.001
-    prob_magnitude_mutate = 0.001
-    prob_probability_mutate = 0.001
+    prob_technique_mutate = 0.01
+    prob_magnitude_mutate = 0.01
+    prob_probability_mutate = 0.01
 
 
     num_evolution_steps = 100
@@ -575,7 +731,7 @@ if(__name__ == "__main__"):
 
     evolution_probabilities = CreateProbabilitiesDict(prob_crossover,prob_technique_mutate,prob_probability_mutate,prob_magnitude_mutate)
 
-    species_attributes = CreateSpeciesAttributeDict(population_size,len(augmentation_list), num_technqiues_per_sub_policy, num_sub_policies_per_policy)
+    species_attributes = CreateSpeciesAttributeDict(population_size,len(augmentation_list), num_techniques_per_sub_policy, num_sub_policies_per_policy)
     
     experiment_attributes["species_attributes"] = species_attributes
 
@@ -583,10 +739,14 @@ if(__name__ == "__main__"):
     experiment_attributes["remote_ga_directory"] = "/home/c.c0919382/fyp_scw1427/genetic_augment"
 
     population = []
-    for p_i in range(population_size):
-        population.append(CreateRandomChromosome(species_attributes))
     
-
+    if(autoaugment_based_population):
+        population = GenerateStartingPoliciesFromPaperPolicy(population_size,augmentation_list,species_attributes)
+    else:
+        for p_i in range(population_size):
+            population.append(CreateRandomChromosome(species_attributes))
+    
+    
     for step in range(num_evolution_steps):
         print("____")
         print("Starting evolution step: " +str(step))
