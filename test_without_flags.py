@@ -17,11 +17,12 @@ tf.flags.DEFINE_string('dataset', "cifar10",
 tf.flags.DEFINE_integer('use_cpu', 0, '1 if use CPU, else GPU.')
 tf.flags.DEFINE_string('policy_id', "default_policy_0001", 'id of policy to be evaluated')
 tf.flags.DEFINE_integer('num_epochs', 2, 'Number of epochs to train model before evaluating')
+tf.flags.DEFINE_integer('num_training_images', 4000, 'Number of training images to train on.')
 
 FLAGS = tf.flags.FLAGS
 
 
-def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
+def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0, num_training_images=4000):
     print("Training with policy:"+str(policy_id))
     
     checkpoints_dir = os.path.join(os.getcwd(),"checkpoints")
@@ -37,7 +38,8 @@ def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_n
     FLAGS.dataset = dataset 
     FLAGS.use_cpu = use_cpu 
     FLAGS.policy_id = policy_id 
-    FLAGS.num_epochs = num_epochs 
+    FLAGS.num_epochs = num_epochs
+    FLAGS.num_training_images = num_training_images 
 
     valid_accuracy, test_accuracy = evaluator.evaluate_policies_without_flags.TrainModelWithPolicies(FLAGS)
     return valid_accuracy, test_accuracy
@@ -49,8 +51,13 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     print("Using data path:"+data_path)
+
     policy_id = "000proposed_policy"
-    num_epochs = 200
+    if(len(sys.argv) > 2):
+        policy_id = sys.argv[2]
+    print("Using policy:"+policy_id)
+
+    num_epochs = 120
     model_name = "wrn"
     data_path = data_path
     dataset = "cifar10"

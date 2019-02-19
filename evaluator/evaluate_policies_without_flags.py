@@ -433,7 +433,7 @@ def TrainModelWithPolicies(flag_arg):
   if FLAGS.dataset not in ['cifar10', 'cifar100']:
     raise ValueError('Invalid dataset: %s' % FLAGS.dataset)
   hparams = tf.contrib.training.HParams(
-      train_size=4000,
+      train_size=FLAGS.num_training_images,
       validation_size=0,
       eval_test=1,
       dataset=FLAGS.dataset,
@@ -502,6 +502,7 @@ if __name__ == '__main__':
   tf.flags.DEFINE_integer('use_cpu', 0, '1 if use CPU, else GPU.')
   tf.flags.DEFINE_string('policy_id', '000001', 'id of policy to be evaluated')
   tf.flags.DEFINE_integer('num_epochs', 1, 'Number of epochs to train model before evaluating')
+  tf.flags.DEFINE_integer('num_training_images', 4000, 'Number of training images to train on.')
 
   FLAGS = tf.flags.FLAGS
 

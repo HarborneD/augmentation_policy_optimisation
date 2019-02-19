@@ -22,13 +22,14 @@ tf.flags.DEFINE_string('dataset', "cifar10",
 tf.flags.DEFINE_integer('use_cpu', 0, '1 if use CPU, else GPU.')
 tf.flags.DEFINE_string('policy_id', "default_policy_0001", 'id of policy to be evaluated')
 tf.flags.DEFINE_integer('num_epochs', 2, 'Number of epochs to train model before evaluating')
+tf.flags.DEFINE_integer('num_training_images', 4000, 'Number of training images to train on.')
 
 FLAGS = tf.flags.FLAGS
 
 print("created flags")
 
 
-def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
+def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0, num_training_images=4000):
     print("Training with policy:"+str(policy_id))
     
     checkpoints_dir = os.path.join(os.getcwd(),"checkpoints")
@@ -45,6 +46,7 @@ def TrainWithPolicy(policy_id, num_epochs, data_path, dataset="cifar10", model_n
     FLAGS.use_cpu = use_cpu 
     FLAGS.policy_id = policy_id 
     FLAGS.num_epochs = num_epochs 
+    FLAGS.num_training_images = num_training_images 
 
     valid_accuracy, test_accuracy = evaluator.evaluate_policies_without_flags.TrainModelWithPolicies(FLAGS)
     return valid_accuracy, test_accuracy
@@ -67,17 +69,18 @@ def StoreResults(configuration_dict, test_accuracy):
 
 if __name__ == "__main__":
     try:
-      opts, args = getopt.getopt(sys.argv[1:],"",["data_path=","policy_id=","num_epochs=","model_name","dataset","use_cpu"])
+      opts, args = getopt.getopt(sys.argv[1:],"",["data_path=","policy_id=","num_epochs=","model_name","dataset","use_cpu","num_training_images"])
     
     except getopt.GetoptError:
-      print('evaluate_child_model.py --data_path <data_path> --policy_id <policy_id> --num_epochs <num_epochs> --model_name <model_name> --dataset <dataset> --use_cpu <use_cpu>')
+      print('evaluate_child_model.py --data_path <data_path> --policy_id <policy_id> --num_epochs <num_epochs> --model_name <model_name> --dataset <dataset> --use_cpu <use_cpu> --num_training_images <num_training_images>')
       sys.exit(2)
     
     #set_defaults
     model_name = "wrn"
     dataset = "cifar10"
     use_cpu = 0 
-    
+    num_training_images=4000
+
     for opt, arg in opts:
         if opt in ("--data_path"):
             data_path = arg
@@ -91,10 +94,13 @@ if __name__ == "__main__":
             dataset = arg
         elif opt in ("--use_cpu"):
             use_cpu = arg
+        elif opt in ("--num_training_images"):
+            num_training_images = arg
    
     print("Training Child Model Using Policy: "+str(policy_id))
+    print("Number of Training Images: "+str(num_training_images))
     start_time = time.time()
-    valid_accuracy, test_accuracy = TrainWithPolicy(policy_id, num_epochs, data_path, dataset=dataset, model_name=model_name, use_cpu=use_cpu)
+    valid_accuracy, test_accuracy = TrainWithPolicy(policy_id, num_epochs, data_path, dataset=dataset, model_name=model_name, use_cpu=use_cpu, num_training_images=num_training_images)
     time_taken = time.time() - start_time
 
     print("valid_accuracy", "test_accuracy")
@@ -107,6 +113,7 @@ if __name__ == "__main__":
         ,"dataset":dataset
         ,"use_cpu":use_cpu
         ,"time_taken":time_taken
+        ,"num_training_images":num_training_images
     }
 
     StoreResults(configuration_dict, test_accuracy)
