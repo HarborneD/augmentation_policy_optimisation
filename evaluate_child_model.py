@@ -79,7 +79,7 @@ if __name__ == "__main__":
     model_name = "wrn"
     dataset = "cifar10"
     use_cpu = 0 
-    num_training_images=4000
+    num_training_images=50000
 
     for opt, arg in opts:
         if opt in ("--data_path"):
@@ -95,6 +95,7 @@ if __name__ == "__main__":
         elif opt in ("--use_cpu"):
             use_cpu = arg
         elif opt in ("--num_training_images"):
+            print("num training images arg found")
             num_training_images = arg
    
     print("Training Child Model Using Policy: "+str(policy_id))
