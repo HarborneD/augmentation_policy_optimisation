@@ -145,3 +145,5 @@ prob_results.csv
 outputs_accumulated.csv
 
 /generation_viewer/*.json
+
+settings.json
