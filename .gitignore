@@ -132,3 +132,16 @@ credentials.json
 
 bfg.jar
 *bfg*
+
+#ignore generation csv
+*sankey.csv
+
+#ignore pso log
+report.log*
+
+#ignore large probabilities calc csv
+prob_results.csv
+
+outputs_accumulated.csv
+
+/generation_viewer/*.json

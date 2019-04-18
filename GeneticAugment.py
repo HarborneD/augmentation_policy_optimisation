@@ -24,17 +24,34 @@ from ArccaGAFunctions import RemoteGATool
 def LocalSequential(fitness_function, policies, augmentations, experiment_attributes):
     population_fitness = []
 
+    best_policy_id = None
+    best_accuracy = 0
     for policy in policies:
         population_fitness.append( (policy[0], fitness_function(policy[0],augmentations, experiment_attributes, policy[1])) )
-
+        if(population_fitness[-1][1] > best_accuracy):
+            best_accuracy = population_fitness[-1][1]
+            best_policy_id = policy[1]
     
     if(experiment_attributes["clean_directories"]):
         LocalCleanDirectoriesAndStoreCurrentGen([p[1] for p in policies])
 
-    return population_fitness
+    return population_fitness, best_policy_id, best_accuracy
 
 
-def ArccaParallel(fitness_function, policies, augmentations, experiment_attributes):
+def ArccaParallel(fitness_function, policies, augmentations, experiment_attributes, repeats_per_policy=3):
+    #fitness_function is not used and is included to support other forms of evaluation function
+    max_jobs = 10
+    if("max_jobs" in experiment_attributes):
+        max_jobs = experiment_attributes["max_jobs"]
+
+    
+    num_batches = int(math.ceil(len(policies) / float(max_jobs)))
+
+    clear_checkpoint_limit = 10
+    always_clear_checkpoints = len(policies) > clear_checkpoint_limit
+
+    cumulative_results = {}
+
     remote_tool = RemoteGATool(experiment_attributes["local_ga_directory"],experiment_attributes["remote_ga_directory"])
 
     policy_ids = []
@@ -45,26 +62,71 @@ def ArccaParallel(fitness_function, policies, augmentations, experiment_attribut
     
     for policy_id in policy_ids:
         remote_tool.SendPolicyFile(policy_id)
+        cumulative_results[policy_id] = 0
+    
+    best_single_trial_accuracy = 0
+    best_single_trial_policy_id = ""
 
-    remote_tool.StartGenerationTraining(policy_ids,experiment_attributes["num_epochs"])
+    last_job_i = -1
+    while((last_job_i+1) < len(policies)):
+    # for batch_i in range(num_batches):
+        active_jobs = len(remote_tool.arcca_tool.GetActiveJobs())
+        jobs_in_batch = max_jobs - active_jobs
 
-    remote_tool.WaitForGenerationComplete()
+        # print("Batch "+str(batch_i+1)+" of "+str(num_batches))
+        # batch_start = batch_i*max_jobs
+        # batch_end = min((batch_i+1)*max_jobs , len(policies))
+        
+        batch_start = last_job_i+1
+        batch_end = min(batch_start+jobs_in_batch , len(policies))
+        last_job_i = (batch_end-1)
 
-    time.sleep(2)
-    results = remote_tool.GetGenerationResults()
+        batch_policy_ids = policy_ids[batch_start:batch_end]
+        print("Batch Index Range(inc.): "+str(batch_start)+" to "+str(last_job_i))
+        
 
+        for repeat_i in range(repeats_per_policy):
+            remote_tool.StartGenerationTraining(batch_policy_ids,experiment_attributes["num_epochs"])
+
+            remote_tool.WaitForGenerationComplete()
+
+            time.sleep(2)
+            results = remote_tool.GetGenerationResults()
+
+            for result in results:
+                policy_id = result["policy_id"]
+                cumulative_results[policy_id] += result["test_accuracy"]
+
+                if(result["test_accuracy"] > best_single_trial_accuracy):
+                    best_single_trial_accuracy = result["test_accuracy"]
+                    best_single_trial_policy_id = policy_id
+                    print("New Best Single Policy:")
+                    print(best_single_trial_policy_id + ": " + str(best_single_trial_accuracy))
+
+            if(always_clear_checkpoints or (repeat_i != (repeats_per_policy-1))):
+                remote_tool.CleanCheckpoints(batch_policy_ids)
+    
+
+    results = []
+    for k in cumulative_results:
+        results.append({"policy_id":k,"test_accuracy": cumulative_results[k] / float(repeats_per_policy)})
 
 
     population_fitness = []
 
+    best_policy_id = None
+    best_accuracy = 0
     for result in results:
         policy_id = result["policy_id"]
-        population_fitness.append( ( chromosome_dict[policy_id], result["test_accuracy"]) )
+        population_fitness.append( ( chromosome_dict[policy_id], result["test_accuracy"], policy_id) )
+        if(result["test_accuracy"] > best_accuracy):
+            best_accuracy = result["test_accuracy"]
+            best_policy_id = policy_id
 
-    if(experiment_attributes["clean_directories"]):
+    if( (not always_clear_checkpoints) and experiment_attributes["clean_directories"] ):
         remote_tool.CleanDirectoriesAndStoreCurrentGen(policy_ids)
 
-    return population_fitness
+    return population_fitness, best_policy_id, best_accuracy
 
 
 ##CHROMOSOME FITNESS FUNCTIONS
@@ -240,6 +302,67 @@ def MutateProbability(chromosome,prob_probability_mutate,species_attributes):
     return chromosome
 
 
+def CreateAllNeighbours(chromosome,species_attributes):
+    # "num_augmentations":num_augmentations,
+    # "num_techniques":num_techniques_per_sub_policy,
+    # "num_sub_policies":num_sub_policies_per_policy,
+    # "sub_policy_size":(num_augmentations + 2)* num_techniques_per_sub_policy,
+
+    neighbour_move_functions = [NeighbourByTechnique
+                                ,NeighbourByProbability
+                                ,NeighbourByMagnitude
+                                ]
+    
+    neighbour_move_value_ranges = [ None
+                                    ,None
+                                    ,None
+                                     ]
+
+
+
+    neighbours = []
+    for sub_policy_i in range(species_attributes["num_sub_policies"]):
+        for technique_i in range(species_attributes["num_techniques"]):
+            current_technique, _, _, _ = FetchTechniqueFromLocalIndex(chromosome,technique_i, sub_policy_i,species_attributes)
+            current_augmentation_local_i = current_technique[0].index(1.0)
+            
+            global_probability_i = MapLocalProbabilityIndexsToGlobalInChromosome(technique_i, sub_policy_i, species_attributes)
+                
+            global_magnitude_i = MapLocalMagnitudeIndexsToGlobalInChromosome(technique_i, sub_policy_i, species_attributes)
+            
+            #set possible values of technique for current technique
+            neighbour_move_value_ranges[0] = list(range(species_attributes["num_augmentations"]-1))
+            neighbour_move_value_ranges[0].remove(current_augmentation_local_i)
+            
+            #set possible values of probability for current technique
+            neighbour_move_value_ranges[1] = []
+            current_probability = chromosome[global_probability_i]
+            if(current_probability >= 0.1):
+                neighbour_move_value_ranges[1].append(current_probability-0.1)
+
+            if(current_probability <= 0.9):
+                neighbour_move_value_ranges[1].append(current_probability+0.1)
+            
+            #set possible values of magnitude for current technique
+            neighbour_move_value_ranges[2] = []
+            current_magnitude = chromosome[global_magnitude_i]
+            if(current_magnitude >= 0.1):
+                neighbour_move_value_ranges[2].append(current_magnitude-0.1)
+
+            if(current_magnitude <= 0.9):
+                neighbour_move_value_ranges[2].append(current_magnitude+0.1)
+            
+
+
+            for neighbour_move_func_i in range(len(neighbour_move_functions)):
+                neighbour_move_func = neighbour_move_functions[neighbour_move_func_i]
+
+                for neighbour_move_value in neighbour_move_value_ranges[neighbour_move_func_i]:
+                    neighbours.append( CreateNeighbour(chromosome,species_attributes, sub_policy_i, technique_i, neighbour_move_func, neighbour_move_value) )
+
+    return neighbours
+
+
 def CreateNeighbour(chromosome,species_attributes, change_sub_policy_i = -1, change_technique_i=-1, neighbourhood_move_func = None , new_val =-1):
     if(change_sub_policy_i == -1):
         change_sub_policy_i = random.randint(0,species_attributes["num_sub_policies"]-1)
@@ -264,11 +387,12 @@ def NeighbourByTechnique(chromosome, s_i, t_i,species_attributes,new_val=-1):
         new_augmentation_local_i = current_augmentation_local_i
         while(new_augmentation_local_i == current_augmentation_local_i):
             new_augmentation_local_i = random.randint(0,species_attributes["num_augmentations"]-1)
-        
-    chromosome[t_global_i+current_augmentation_local_i] = 0.0
-    chromosome[t_global_i+new_augmentation_local_i] = 1.0
 
-    return chromosome
+    new_chomosome = np.copy(chromosome)  
+    new_chomosome[t_global_i+current_augmentation_local_i] = 0.0
+    new_chomosome[t_global_i+new_augmentation_local_i] = 1.0
+
+    return new_chomosome
 
 
 def NeighbourByProbability(chromosome, s_i, t_i,species_attributes,new_val=-1):
@@ -287,9 +411,11 @@ def NeighbourByProbability(chromosome, s_i, t_i,species_attributes,new_val=-1):
 
         new_probability = random.choice(probability_possibilities)
 
-    chromosome[global_probability_i] = new_probability
+    new_chomosome = np.copy(chromosome)  
+    
+    new_chomosome[global_probability_i] = new_probability
 
-    return chromosome
+    return new_chomosome
 
 
 def NeighbourByMagnitude(chromosome, s_i, t_i,species_attributes,new_val=-1):
@@ -308,9 +434,11 @@ def NeighbourByMagnitude(chromosome, s_i, t_i,species_attributes,new_val=-1):
         
         new_magnitude = random.choice(magnitude_possibilities)
 
-    chromosome[global_magnitude_i] = new_magnitude
+    new_chomosome = np.copy(chromosome)  
+    
+    new_chomosome[global_magnitude_i] = new_magnitude
 
-    return chromosome
+    return new_chomosome
 
 
 def CreateNeighboursFromChromosome(num_neighbours, chromosome, species_attributes ):
@@ -360,7 +488,7 @@ def FetchSubPolicyFromIndex(chromosome, sub_policy_i, species_attributes):
 
 
 def TechniqueToAugmentationTuple(technique,augmentations):
-    augmentation_i = technique[0].index(1.0)
+    augmentation_i = list(technique[0]).index(1.0)
 
     return (augmentations[augmentation_i], technique[1], int(technique[2]*10))
 
@@ -498,6 +626,28 @@ def GenerateStartingPoliciesFromPaperPolicy(population_size,augmentation_list,sp
     return policies
 
 
+def LoadGenerationByEvolutionStep(step,experiment_attributes):
+    policies = []
+
+    for chromosome_i in range(experiment_attributes["species_attributes"]["population_size"]):
+        chromosome_id = format(step, '05d') + "_" + format(chromosome_i, '05d')
+
+        policy_id = experiment_attributes["experiment_id"]+"_"+str(chromosome_id)
+    
+        policy_path = os.path.join("policies",policy_id+".json")
+
+        policy_json = None
+
+        with open(policy_path, "r") as f:
+            policy_string = f.read()
+            policy_json = json.loads(policy_string)
+
+        loaded_chromosome = PolicyJsonToChromosome(policy_json,experiment_attributes["augmentation_list"],experiment_attributes["species_attributes"] )
+
+        policies.append(loaded_chromosome)
+    
+    return policies
+
 
 ###EVOLUTION STAGE FUNCTIONS
 def EvaluatePopulation(population,fitness_function, augmentations, experiment_attributes, step):
@@ -510,11 +660,11 @@ def EvaluatePopulation(population,fitness_function, augmentations, experiment_at
 
         policies.append( (chromosome, StorePoliciesAsJsons(chromosome, augmentations, experiment_attributes, chromosome_id)) )
     
-    population_fitness = experiment_attributes["population_evaluation_function"](fitness_function, policies, augmentations, experiment_attributes)
+    population_fitness, best_policy_id, best_accuracy  = experiment_attributes["population_evaluation_function"](fitness_function, policies, augmentations, experiment_attributes)
     # for policy in range(len(policies)):
     #     population_fitness.append( (policy[0], fitness_function(policies[0],augmentations, experiment_attributes, policy[1])) )
 
-    return population_fitness
+    return population_fitness, best_policy_id, best_accuracy 
 
 
 def PerformCrossoverAndMutations(chromosome_1,chromosome_2, evolution_probabilities, species_attributes):
@@ -553,10 +703,9 @@ def MoveToNextGeneration(population_fitness, evolution_probabilities, species_at
 
     population_fitness = sorted(population_fitness, key=lambda x: x[1], reverse=True)
     #print(population_fitness[0])
-    num_elite = int(math.ceil((species_attributes["population_size"]*elitism_ratio) / 2.) * 2)
+    num_elite = int(math.ceil((species_attributes["population_size"]*elitism_ratio)/2.0)*2)
     
     next_generation += [x[0] for x in population_fitness[:num_elite]]
-    next_generation[0]
     # for n in next_generation:
     #     print(n)
     # print("++++")
@@ -607,7 +756,7 @@ def CreateProbabilitiesDict(prob_crossover,prob_technique_mutate,prob_probabilit
 def LogGeneration(experiment_id,generation_stats):
     generation_string =""
 
-    keys = ["step","max_fitness","min_fitness","average_fitness"]
+    keys = ["step","max_fitness","min_fitness","average_fitness","best_fitness_so_far","best_policy_so_far"]
     for k in keys:
         generation_string += str(generation_stats[k]) + ","
     
@@ -686,19 +835,21 @@ def CleanLocalCurrentGeneration(policy_ids):
         
 if(__name__ == "__main__"):
     train_remote = True
-    autoaugment_based_population = True
-
+    autoaugment_based_population = False
+    load_from_step = 5
+    
     data_path = "/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
     if(len(sys.argv) > 1):
         data_path = sys.argv[1]
     experiment_attributes = {
-        "experiment_id":"AutoAugmentBasedPopulation_exp_0001_20e_10p_25-2"
-        ,"num_epochs":20
+        "experiment_id":"AutoAugmentBasedPopulation_exp_0002_120e_10p_25-2"
+        ,"num_epochs":120
         ,"data_path":data_path
         ,"dataset":"cifar10"
         ,"model_name":"wrn"
         ,"use_cpu":0
         ,"clean_directories":True
+        ,"num_steps": 10
        
     }
 
@@ -710,6 +861,8 @@ if(__name__ == "__main__"):
         experiment_attributes["population_evaluation_function"] = LocalSequential
 
     augmentation_list = list(augmentation_transforms.TRANSFORM_NAMES)
+    experiment_attributes["augmentation_list"] = augmentation_list
+    
     print("")
     print("number of augmentations: ", len(augmentation_list))
     print("")
@@ -718,13 +871,13 @@ if(__name__ == "__main__"):
     
     population_size = 10
 
-    prob_crossover = 0.001
-    prob_technique_mutate = 0.01
-    prob_magnitude_mutate = 0.01
-    prob_probability_mutate = 0.01
+    prob_crossover = 0.01
+    prob_technique_mutate = 0.05
+    prob_magnitude_mutate = 0.05
+    prob_probability_mutate = 0.05
 
 
-    num_evolution_steps = 100
+    num_evolution_steps = experiment_attributes["num_steps"]
 
     fitness_function = TrainWithPolicyFitness
     
@@ -740,20 +893,28 @@ if(__name__ == "__main__"):
 
     population = []
     
+    starting_step = 0 
     if(autoaugment_based_population):
         population = GenerateStartingPoliciesFromPaperPolicy(population_size,augmentation_list,species_attributes)
     else:
-        for p_i in range(population_size):
-            population.append(CreateRandomChromosome(species_attributes))
-    
-    
-    for step in range(num_evolution_steps):
+        if(load_from_step == -1):
+            for p_i in range(population_size):
+                population.append(CreateRandomChromosome(species_attributes))
+        else:
+            population = LoadGenerationByEvolutionStep(load_from_step,experiment_attributes)    
+            starting_step = load_from_step
+
+    best_global_accuracy = 0
+    best_global_policy_id = None
+    for step in range(starting_step,num_evolution_steps):
         print("____")
         print("Starting evolution step: " +str(step))
         print("")
 
-        population_fitness = EvaluatePopulation(population,fitness_function, augmentation_list, experiment_attributes, step)
-        
+        population_fitness, best_policy_id, best_accuracy = EvaluatePopulation(population,fitness_function, augmentation_list, experiment_attributes, step)
+        if(best_accuracy > best_global_accuracy):
+            best_global_policy_id = best_policy_id
+            best_global_accuracy = best_accuracy
       
         # for p in population_fitness:
         #     print(p)
@@ -770,6 +931,8 @@ if(__name__ == "__main__"):
                 ,"max_fitness":max(fitness_vals)
                 ,"min_fitness":min(fitness_vals)
                 ,"average_fitness":sum(fitness_vals)/float(len(fitness_vals))
+                ,"best_fitness_so_far":best_global_accuracy
+                ,"best_policy_so_far":best_global_policy_id
             }
 
         LogGeneration(experiment_attributes["experiment_id"],generation_stats)
@@ -779,6 +942,9 @@ if(__name__ == "__main__"):
             print("Max Fitness:", generation_stats["max_fitness"])
             print("Min Fitness:", generation_stats["min_fitness"] )
             print("Average Fitness:", generation_stats["average_fitness"] )
+            print("Best Fitness So Far:", best_global_accuracy)
+            print("Best Policy Id So Far:", best_global_policy_id)
+            
             # for p in population_fitness:
             #     print(p)
             print("-----")
@@ -787,11 +953,8 @@ if(__name__ == "__main__"):
             
 
 
-        population = MoveToNextGeneration(population_fitness, evolution_probabilities, species_attributes, elitism_ratio=0.05)
-
-
-# for p in population:
-#     print(p)
-
-# print("fffff")
+        population = MoveToNextGeneration(population_fitness, evolution_probabilities, species_attributes, elitism_ratio=0.1)
+    print("Best Policy Found:")
+    print(best_global_policy_id)
+    print(best_global_accuracy)
 

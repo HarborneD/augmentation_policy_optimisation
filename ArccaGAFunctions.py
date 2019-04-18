@@ -1,5 +1,5 @@
-from ARCCAPythonTool import ArccaTool
 
+from ARCCAPythonTool import ArccaTool
 import os
 import time
 
@@ -38,8 +38,8 @@ class RemoteGATool(object):
         self.arcca_tool.SendFileToServer(local_policy_path,remote_policy_path)
     
     
-    def StartRemoteChromosomeTrain(self, policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0):
-        _, _, _, job_id, was_error = self.arcca_tool.StartBatchJob(self.ACCOUNT,self.RUN_FROM_PATH,self.SCRIPT_NAME,'"'+str(policy_id)+'" "'+str(num_epochs)+'"')
+    def StartRemoteChromosomeTrain(self, policy_id, num_epochs, data_path, dataset="cifar10", model_name="wrn", use_cpu=0, num_train_images=4000):
+        _, _, _, job_id, was_error = self.arcca_tool.StartBatchJob(self.ACCOUNT,self.RUN_FROM_PATH,self.SCRIPT_NAME,'"'+str(policy_id)+'" "'+str(num_epochs)+'" "'+str(num_train_images)+'"')
         return job_id, was_error
         
     def HandleJobError(self):
@@ -78,21 +78,30 @@ class RemoteGATool(object):
         #         ,"nodes":result[6]
         #         ,"nodelist":result[7]
         #         }
-        job_queue = self.arcca_tool.CheckJobs(job_ids=self.PolicyListToJobList(self.current_generation))
+        job_ids=self.PolicyListToJobList(self.current_generation)
+
+        job_queue = self.arcca_tool.CheckJobs(job_ids=job_ids)
 
         jobs = []
         for job_line in job_queue[1:]:
             jobs.append(self.arcca_tool.ProcessJobLine(job_line))
         
         jobs_in_queue = []
-        for job in jobs:
-            jobs_in_queue.append(job["job_id"])
-            policy_id = self.job_map[job["job_id"]]
-            self.training_tracker[policy_id]["last_known_status"] = self.arcca_tool.JOB_STATUS_CODES[job["st"]]["name"]
+        for job_id in jobs:
+            jobs_in_queue.append(job_id)
+
+        jobs_statuses = self.arcca_tool.CheckJobsStatuses(start_time="2019-02-01")
+        
+        for policy_id in self.current_generation:
+            job_id = self.training_tracker[policy_id]["job_id"]
+        
+            if(job_id in jobs_statuses):
+                self.training_tracker[policy_id]["last_known_status"] = jobs_statuses[job_id]["state"] #self.arcca_tool.JOB_STATUS_CODES[job["st"]]["name"]
 
         self.running_jobs_of_generation = jobs_in_queue
 
 
+    
     def WaitForGenerationComplete(self):
         num_jobs = len(self.current_generation)
 
@@ -101,13 +110,17 @@ class RemoteGATool(object):
         while len(self.running_jobs_of_generation) > 0:
             self.UpdateCurrentGenerationJobs()
             jobs_strings=""
-            for job_id in self.running_jobs_of_generation:
-                policy_id = self.job_map[job_id]
-                jobs_strings+= str(job_id)+","
+            for policy_id in self.current_generation:
+                job_id = self.training_tracker[policy_id]["job_id"]
+                
+                status_letter = ""
+                if(policy_id in self.training_tracker):
+                    status_letter = self.training_tracker[policy_id]["last_known_status"][:1]
+                jobs_strings+= str(job_id)+status_letter+","
             jobs_strings = jobs_strings[:-1] 
             progress.current = num_jobs - len(self.running_jobs_of_generation)
             progress(jobs_strings)
-            time.sleep(5)
+            time.sleep(3)
         progress.done()
         
 
@@ -147,10 +160,36 @@ class RemoteGATool(object):
 
                 results.append(self.ReadResultsFile(local_result_path))
             except:
-                print("Policy Failed: "+ policy_id)
+                print("Policy Results Fetch: "+ policy_id)
                 print("")
         return results
     
+
+    def GetPolicyResults(self,policy_id):
+        local_results_dir = os.path.join(self.local_ga_directory,"results")
+        remote_results_dir = os.path.join(self.remote_ga_directory,"results")
+        
+        local_result_path = os.path.join(local_results_dir,policy_id+".csv")
+        remote_result_path = os.path.join(remote_results_dir,policy_id+".csv")
+
+        try:
+            self.arcca_tool.FetchFileFromServer(remote_result_path,local_result_path)
+
+            return self.ReadResultsFile(local_result_path)
+
+        except:
+            print("Policy Results Fetch Failed: "+ policy_id)
+            print("")
+
+            return None
+    
+
+    def CleanCheckpoints(self,policy_ids):
+        checkpoints_dir = os.path.join(self.remote_ga_directory,"checkpoints")
+        for policy_id in policy_ids:
+            checkpoint_path = os.path.join(checkpoints_dir,"checkpoints_"+policy_id)
+            self.arcca_tool.RemoveRemoteItem(checkpoint_path)
+        
 
     def CleanDirectoriesAndStoreCurrentGen(self,policy_ids):
         previous_generation_path = os.path.join(self.remote_ga_directory,"previous_generation")

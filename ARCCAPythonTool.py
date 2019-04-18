@@ -6,11 +6,19 @@ import os
 
 import re
 
-import thread
+try:
+    import thread
+except:
+    import _thread as thread
+
 import time
 
 import stat
 
+try:
+    raw_input()
+except:
+    raw_input = input
 
 ### Connection
 #[x] load credentials
@@ -58,7 +66,7 @@ class ArccaTool(object):
             ,"batch_job":"sbatch"
             ,"cancel_job":"scancel"
             ,"change_directory":"cd"
-            ,"job_status":"sacct"
+            ,"check_status":"sacct"
         }
 
         self.JOB_STATUS_CODES = None
@@ -117,13 +125,14 @@ class ArccaTool(object):
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def Connect(self, tpn_override= True):
-        self.client.connect(self.host, username=self.credentials["username"], password=self.credentials["pw"])
-        if(tpn_override):
-            self.TpnOverride()
+        if(self.client.get_transport() is None or (not self.client.get_transport().is_active())):
+            self.client.connect(self.host, username=self.credentials["username"], password=self.credentials["pw"])
+            if(tpn_override):
+                self.TpnOverride()
         self.client_open = True
 
     def CloseConnection(self):
-        if(self.client.get_transport().is_active()):
+        if( (not self.client.get_transport() is None) and self.client.get_transport().is_active()):
             print("___")
             print("closing connection")
             print("___")
@@ -133,7 +142,16 @@ class ArccaTool(object):
 
     ###COMMANDS
     def SendCommand(self,command):
-        stdin, stdout, stderr = self.client.exec_command(command)
+        try:
+            stdin, stdout, stderr = self.client.exec_command(command)
+        except:
+            time.sleep(5)
+            try:
+                self.Connect()
+                time.sleep(1)
+            except:
+                pass
+            stdin, stdout, stderr = self.client.exec_command(command)
         return stdin, stdout, stderr
 
 
@@ -182,29 +200,48 @@ class ArccaTool(object):
         
         _, stdout, _ = self.SendCommand(status_command)
         status_lines = []
-        for line in stdout:
-            status_lines.append(line.strip('\n'))
-        
-        statuses = []
+        try:
+            for line in stdout:
+                status_lines.append(line.strip('\n'))
+        except:
+            _, stdout, _ = self.SendCommand(status_command)
+            status_lines = []
+            for line in stdout:
+                status_lines.append(line.strip('\n'))
+
+        statuses = {}
         for status_line in status_lines:
-            statuses.append(self.ProcessStatusLine(line))
+            status = self.ProcessStatusLine(status_line)
+            if(not status is None):
+                statuses[status["job_id"]] = status
             
         return statuses
+
+    def GetActiveJobs(self, start_time="2019-01-01"):
+        jobs_statuses = self.CheckJobsStatuses(start_time="2019-02-01")
+        
+        active_jobs = []
+        for job_id in jobs_statuses:
+            if(jobs_statuses[job_id]["state"] == "PENDING" or jobs_statuses[job_id]["state"] == "RUNNING"):
+               active_jobs.append( job_id )
+        
+        return active_jobs
     
 
     def ProcessStatusLine(self,status_line):
-
+        result = re.findall(r'([\w\[\]\-\:\.\(\)]+)', status_line)
+        
         status = None
         
-        if(len(status_line) == 7):
+        if(len(result) == 7):
             status = {
-                "job_id":status_line[0]
-                ,"job_name":status_line[1]
-                ,"partition":status_line[2]
-                ,"account":status_line[3]
-                ,"cpu_alloc":status_line[4]
-                ,"state":status_line[5]
-                ,"exit_code":status_line[6]
+                "job_id":result[0]
+                ,"job_name":result[1]
+                ,"partition":result[2]
+                ,"account":result[3]
+                ,"cpu_alloc":result[4]
+                ,"state":result[5]
+                ,"exit_code":result[6]
                 
                 }
 
@@ -350,12 +387,10 @@ class ArccaTool(object):
 
     ###SFTP FUNCTIONS
     def CreateSFTPConnection(self):
-        if(self.sftp is None):
-            if(not self.client_open):
-                self.Connect()
-            
+        self.Connect()
+        if(self.sftp is None or self.sftp.sock.closed):
             self.sftp = self.client.open_sftp()
-    
+
 
     def CloseSFTPConnection(self):
         if(not self.sftp is None):
@@ -366,36 +401,46 @@ class ArccaTool(object):
     def SendFileToServer(self,source_path,destination_path):
         self.CreateSFTPConnection()
         self.sftp.put(source_path, destination_path)
-    
+        #self.CloseSFTPConnection()
 
     def FetchFileFromServer(self,source_path,destination_path):
         self.CreateSFTPConnection()
         self.sftp.get(source_path, destination_path)
-
+        #self.CloseSFTPConnection()
 
     def ListRemoteDir(self, path):
-        return self.sftp.listdir(path)
+        self.CreateSFTPConnection()
+        remote_dir =  self.sftp.listdir(path)
+        #self.CloseSFTPConnection()
+        return remote_dir
 
     def CheckPathExists(self, path):
+        self.CreateSFTPConnection()
         try:
             self.sftp.stat(path)
-        except IOError, e:
-            if e[0] == 2:
-                return False
-            raise
-        else:
+            #self.CloseSFTPConnection()
             return True
-    
+        except IOError:
+            #self.CloseSFTPConnection()
+            return False
+           
 
     def CreateFolder(self,path):
+        self.CreateSFTPConnection()
         self.sftp.mkdir(path)
+        #self.CloseSFTPConnection()
+        
 
 
     def MoveRemoteFile(self, remote_source, remote_destination):
+        self.CreateSFTPConnection()
         self.sftp.rename(remote_source,remote_destination)
+        #self.CloseSFTPConnection()
+        
 
     
     def MoveRemoteDirectory(self, remote_source, remote_destination):
+        self.CreateSFTPConnection()
         if(not self.CheckPathExists(remote_destination)):
             self.CreateFolder(remote_destination)
         
@@ -411,16 +456,27 @@ class ArccaTool(object):
                 self.MoveRemoteFile(source_item_path,destination_item_path)
         
         self.RemoveRemoteDirectory(remote_source)
+        #self.CloseSFTPConnection()
+        
 
     def CheckRemotePathIsDirectory(self,path):
-        fileattr = self.sftp.lstat(path)
-        if stat.S_ISDIR(fileattr.st_mode):
-            return True
-        if stat.S_ISREG(fileattr.st_mode):
-            return False 
+        self.CreateSFTPConnection()
+        try:
+            fileattr = self.sftp.lstat(path)
+            if stat.S_ISDIR(fileattr.st_mode):
+                #self.CloseSFTPConnection()
+                return True
+            if stat.S_ISREG(fileattr.st_mode):
+                #self.CloseSFTPConnection()
+                return False 
+        except:
+            #self.CloseSFTPConnection()
+            return False
 
 
     def RemoveRemoteDirectory(self,path):
+        self.CreateSFTPConnection()
+        
         items_in_dir = self.ListRemoteDir(path)
 
         for item in items_in_dir:
@@ -429,19 +485,34 @@ class ArccaTool(object):
                 self.RemoveRemoteDirectory(item_path)
             else:
                 self.DeleteRemoteFile(item_path)    
-
-        self.sftp.rmdir(path)    
+               
+        self.CreateSFTPConnection()
+        try:
+            self.sftp.rmdir(path) 
+        except:
+            pass
+        #self.CloseSFTPConnection()
+           
     
 
     def DeleteRemoteFile(self,path):
-        self.sftp.remove(path)
+        self.CreateSFTPConnection()
+        try:
+            self.sftp.remove(path)
+        except:
+            pass
+        #self.CloseSFTPConnection()
+        
 
 
     def RemoveRemoteItem(self,path):
+        self.CreateSFTPConnection()
         if(self.CheckRemotePathIsDirectory(path)):
             self.RemoveRemoteDirectory(path)
         else:
             self.DeleteRemoteFile(path)
+        #self.CloseSFTPConnection()
+        
 
     #### destructor
     def __del__(self):
@@ -463,8 +534,8 @@ if __name__ == "__main__":
     #EXAMPLES
     list_home_dir = False
     list_jobs = False
-    test_array_job = True
-
+    test_array_job = False
+    test_num_active_jobs = True
 
     if(list_home_dir):
         stdin, stdout, stderr  = arcca_tool.SendCommand('ls')
@@ -486,10 +557,16 @@ if __name__ == "__main__":
     if(test_array_job):
         account = "scw1077"
         test_batch_script = "test_array_job.sh"
-        
+        run_from_path = ""
         print("Submit Batch Job:")
-        stdin, stdout, stderr, job_id  = arcca_tool.StartBatchJob(account,test_batch_script)
+        stdin, stdout, stderr, job_id, was_error = arcca_tool.StartBatchJob(account,run_from_path,test_batch_script)
         print("")
         for line in stdout:
             print('... ' + line.strip('\n'))
-            
+
+    if(test_num_active_jobs):
+        jobs_statuses = arcca_tool.CheckJobsStatuses(start_time="2019-02-01")
+        
+        for job_id in jobs_statuses:
+            if(jobs_statuses[job_id]["state"] == "PENDING" or jobs_statuses[job_id]["state"] == "RUNNING"):
+               print(jobs_statuses[job_id]["state"])

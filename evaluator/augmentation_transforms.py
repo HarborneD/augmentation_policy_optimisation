@@ -446,10 +446,39 @@ ALL_TRANSFORMS = [
     blur,
     smooth
 ]
+TRANSFORM_NAMES = []
+NAME_TO_TRANSFORM = {} 
+for t in ALL_TRANSFORMS:
+  NAME_TO_TRANSFORM[t.name] = t
+  TRANSFORM_NAMES.append(t.name) 
 
-NAME_TO_TRANSFORM = {t.name: t for t in ALL_TRANSFORMS}
-TRANSFORM_NAMES = NAME_TO_TRANSFORM.keys()
 
+
+FILTERED_TRANSFORMS = [
+    blur,
+    auto_contrast,
+    equalize,
+    invert,
+    rotate,
+    posterize,
+    crop_bilinear,
+    solarize,
+    color,
+    contrast,
+    brightness,
+    sharpness,
+    shear_x,
+    shear_y,
+    translate_x,
+    translate_y,
+    cutout,
+]
+
+FILTERED_TRANSFORM_NAMES = []
+FILTERED_NAME_TO_TRANSFORM = {} 
+for t in FILTERED_TRANSFORMS:
+  FILTERED_NAME_TO_TRANSFORM[t.name] = t
+  FILTERED_TRANSFORM_NAMES.append(t.name) 
 
 if __name__ == "__main__":
   print(TRANSFORM_NAMES)

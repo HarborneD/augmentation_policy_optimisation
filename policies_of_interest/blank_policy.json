@@ -1,0 +1,31 @@
+{
+    "policy": {
+        "policy": [
+            [
+                [
+                    "Invert", 
+                    0.0, 
+                    0
+                ], 
+                [
+                    "Contrast", 
+                    0.0, 
+                    0
+                ]
+            ],
+            [
+                [
+                    "Invert", 
+                    0.0, 
+                    0
+                ], 
+                [
+                    "Contrast", 
+                    0.0, 
+                    0
+                ]
+            ]
+        ], 
+        "id": "blank_policy"
+    }
+}
