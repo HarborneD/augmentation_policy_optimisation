@@ -1,10 +1,10 @@
-POLICY_ID="000001"
+POLICY_ID="autoaugment_paper_cifar10"
 echo policy_id: "$POLICY_ID"
 
-NUM_EPOCHS="2"
+NUM_EPOCHS="200"
 echo num_epochs: "$NUM_EPOCHS"
 
-MODEL_NAME="wrn"
+MODEL_NAME="pyramid_net"
 CHECKPOINT_DIR="$(pwd)/checkpoints/checkpoints_$1"
 DATA_PATH="/media/harborned/ShutUpN/datasets/cifar/cifar-10-batches-py"
 DATASET="cifar10"

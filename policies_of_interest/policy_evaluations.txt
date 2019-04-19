@@ -8,10 +8,17 @@ blank_policy
 4942684
 4942685
 
-best GA ()
-
+best GA (AutoAugmentBasedPopulation_exp_0002_120e_10p_25-2_00005_00005.json)
+4960530
 
 best PSO ()
 
 
 best TABU ()
+
+paper policy thresholded 0.5, 0
+5043786
+5043800
+5043807
+
+paper policy thresholded 0.3, 0

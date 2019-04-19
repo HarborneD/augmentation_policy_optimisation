@@ -438,7 +438,7 @@ def TrainModelWithPolicies(flag_arg):
       eval_test=1,
       dataset=FLAGS.dataset,
       data_path=FLAGS.data_path,
-      batch_size=128,
+      batch_size=32,
       gradient_clipping_by_global_norm=5.0)
   if FLAGS.model_name == 'wrn':
     hparams.add_hparam('model_name', 'wrn')
@@ -477,7 +477,7 @@ def TrainModelWithPolicies(flag_arg):
     hparams.add_hparam('num_epochs', FLAGS.num_epochs)
     hparams.add_hparam('lr', 0.05)
     hparams.add_hparam('weight_decay_rate', 5e-5)
-    hparams.batch_size = 64
+    hparams.batch_size = 32
     hparams.add_hparam('policy_id', FLAGS.policy_id)
     
   else:
