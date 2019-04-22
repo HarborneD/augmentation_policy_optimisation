@@ -97,7 +97,7 @@ if __name__ == "__main__":
         elif opt in ("--num_training_images"):
             print("num training images arg found")
             num_training_images = arg
-   
+    print("Traing Model: "+str(model_name))
     print("Training Child Model Using Policy: "+str(policy_id))
     print("Number of Training Images: "+str(num_training_images))
     start_time = time.time()

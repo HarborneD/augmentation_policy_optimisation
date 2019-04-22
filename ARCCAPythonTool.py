@@ -569,4 +569,4 @@ if __name__ == "__main__":
         
         for job_id in jobs_statuses:
             if(jobs_statuses[job_id]["state"] == "PENDING" or jobs_statuses[job_id]["state"] == "RUNNING"):
-               print(jobs_statuses[job_id]["state"])
+               print(job_id, jobs_statuses[job_id]["state"])

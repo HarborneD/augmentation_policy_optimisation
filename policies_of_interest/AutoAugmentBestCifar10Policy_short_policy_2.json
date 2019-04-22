@@ -1,0 +1,67 @@
+{
+    "policy": {
+        "policy": [
+            [
+                [
+                    "ShearY",
+                    0.2,
+                    7
+                ],
+                [
+                    "Posterize",
+                    0.3,
+                    7
+                ]
+            ],
+            [
+                [
+                    "Color",
+                    0.4,
+                    3
+                ],
+                [
+                    "Brightness",
+                    0.6,
+                    7
+                ]
+            ],
+            [
+                [
+                    "Sharpness",
+                    0.3,
+                    9
+                ],
+                [
+                    "Brightness",
+                    0.7,
+                    9
+                ]
+            ],
+            [
+                [
+                    "Equalize",
+                    0.6,
+                    5
+                ],
+                [
+                    "Equalize",
+                    0.5,
+                    1
+                ]
+            ],
+            [
+                [
+                    "Contrast",
+                    0.6,
+                    7
+                ],
+                [
+                    "Sharpness",
+                    0.6,
+                    5
+                ]
+            ]
+        ],
+        "id": "AutoAugmentBestCifar10Policy_short_policy_2"
+    }
+}

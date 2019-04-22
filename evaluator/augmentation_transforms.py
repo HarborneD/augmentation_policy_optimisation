@@ -454,8 +454,8 @@ for t in ALL_TRANSFORMS:
 
 
 
+##CREATE LIST OF TRANSFORMS THAT THE PAPER USES (some are already part of the base cifar 10 policy)
 FILTERED_TRANSFORMS = [
-    blur,
     auto_contrast,
     equalize,
     invert,
@@ -472,6 +472,7 @@ FILTERED_TRANSFORMS = [
     translate_x,
     translate_y,
     cutout,
+    blur,
 ]
 
 FILTERED_TRANSFORM_NAMES = []
@@ -479,6 +480,24 @@ FILTERED_NAME_TO_TRANSFORM = {}
 for t in FILTERED_TRANSFORMS:
   FILTERED_NAME_TO_TRANSFORM[t.name] = t
   FILTERED_TRANSFORM_NAMES.append(t.name) 
+
+
+##CREATE LIST OF TRANSFORMS WHICH DONT USE MAGNITUDE
+IGNORES_MAGNITUDE = [
+  auto_contrast,
+  equalize,
+  invert
+]
+
+
+IGNORES_MAGNITUDE_NAMES = []
+IGNORES_MAGNITUDE_TO_TRANSFORM = {} 
+for t in IGNORES_MAGNITUDE:
+  IGNORES_MAGNITUDE_TO_TRANSFORM[t.name] = t
+  IGNORES_MAGNITUDE_NAMES.append(t.name) 
+
+
+
 
 if __name__ == "__main__":
   print(TRANSFORM_NAMES)

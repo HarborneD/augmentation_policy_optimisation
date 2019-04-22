@@ -9,16 +9,29 @@ blank_policy
 4942685
 
 best GA (AutoAugmentBasedPopulation_exp_0002_120e_10p_25-2_00005_00005.json)
-4960530
+2892898
+5608030
 
 best PSO ()
 
 
-best TABU ()
+best TABU (tabu_AutoAugmentBasedPopulation_exp_0001_20e_100ls_25-2_00001_00850)
+
 
 paper policy thresholded 0.5, 0
-5043786
-5043800
 5043807
+5102683
+5102684
+5275934 (pyramid)
 
 paper policy thresholded 0.3, 0
+5102690
+5102691
+5103977
+
+small policies
+5602309
+5602431
+5602495
+5602514
+5602781

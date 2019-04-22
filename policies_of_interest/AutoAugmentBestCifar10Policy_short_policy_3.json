@@ -1,0 +1,67 @@
+{
+    "policy": {
+        "policy": [
+            [
+                [
+                    "Color",
+                    0.7,
+                    7
+                ],
+                [
+                    "TranslateX",
+                    0.5,
+                    8
+                ]
+            ],
+            [
+                [
+                    "Equalize",
+                    0.3,
+                    7
+                ],
+                [
+                    "AutoContrast",
+                    0.4,
+                    8
+                ]
+            ],
+            [
+                [
+                    "TranslateY",
+                    0.4,
+                    3
+                ],
+                [
+                    "Sharpness",
+                    0.2,
+                    6
+                ]
+            ],
+            [
+                [
+                    "Brightness",
+                    0.9,
+                    6
+                ],
+                [
+                    "Color",
+                    0.2,
+                    8
+                ]
+            ],
+            [
+                [
+                    "Solarize",
+                    0.5,
+                    2
+                ],
+                [
+                    "Invert",
+                    0.0,
+                    3
+                ]
+            ]
+        ],
+        "id": "AutoAugmentBestCifar10Policy_short_policy_3"
+    }
+}
