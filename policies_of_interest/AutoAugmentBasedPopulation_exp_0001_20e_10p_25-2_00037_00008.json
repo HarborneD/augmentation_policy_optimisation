@@ -8,7 +8,7 @@
                     7
                 ], 
                 [
-                    "Contrast", 
+                    "Color", 
                     0.2, 
                     6
                 ]
@@ -21,7 +21,7 @@
                 ], 
                 [
                     "TranslateX", 
-                    0.3, 
+                    0.4, 
                     9
                 ]
             ], 
@@ -32,7 +32,7 @@
                     1
                 ], 
                 [
-                    "Sharpness", 
+                    "Equalize", 
                     0.9, 
                     3
                 ]
@@ -41,7 +41,7 @@
                 [
                     "ShearY", 
                     0.5, 
-                    8
+                    9
                 ], 
                 [
                     "TranslateY", 
@@ -51,24 +51,24 @@
             ], 
             [
                 [
-                    "AutoContrast", 
+                    "Sharpness", 
                     0.5, 
-                    4
+                    8
                 ], 
                 [
-                    "Equalize", 
-                    0.9, 
+                    "Smooth", 
+                    0.8, 
                     2
                 ]
             ], 
             [
                 [
-                    "ShearY", 
-                    0.2, 
+                    "AutoContrast", 
+                    0.1, 
                     7
                 ], 
                 [
-                    "Posterize", 
+                    "Equalize", 
                     0.3, 
                     7
                 ]
@@ -76,8 +76,8 @@
             [
                 [
                     "Color", 
-                    0.4, 
-                    3
+                    0.5, 
+                    4
                 ], 
                 [
                     "Brightness", 
@@ -87,38 +87,38 @@
             ], 
             [
                 [
-                    "Sharpness", 
-                    0.3, 
+                    "ShearY", 
+                    0.4, 
                     9
                 ], 
                 [
-                    "Brightness", 
-                    0.7, 
-                    9
+                    "Contrast", 
+                    0.6, 
+                    8
                 ]
             ], 
             [
                 [
                     "Equalize", 
-                    0.6, 
+                    0.7999999999999999, 
                     5
                 ], 
                 [
                     "Equalize", 
                     0.5, 
-                    1
+                    0
                 ]
             ], 
             [
                 [
                     "Contrast", 
-                    0.6, 
+                    0.7, 
                     7
                 ], 
                 [
-                    "Sharpness", 
-                    0.6, 
-                    5
+                    "AutoContrast", 
+                    0.7, 
+                    4
                 ]
             ], 
             [
@@ -128,9 +128,9 @@
                     7
                 ], 
                 [
-                    "TranslateX", 
-                    0.5, 
-                    8
+                    "AutoContrast", 
+                    0.6, 
+                    6
                 ]
             ], 
             [
@@ -141,20 +141,20 @@
                 ], 
                 [
                     "AutoContrast", 
-                    0.4, 
+                    0.30000000000000004, 
                     8
                 ]
             ], 
             [
                 [
-                    "TranslateY", 
+                    "Rotate", 
                     0.4, 
                     3
                 ], 
                 [
                     "Sharpness", 
                     0.2, 
-                    6
+                    5
                 ]
             ], 
             [
@@ -172,7 +172,7 @@
             [
                 [
                     "Solarize", 
-                    0.5, 
+                    0.4, 
                     2
                 ], 
                 [
@@ -183,8 +183,8 @@
             ], 
             [
                 [
-                    "Equalize", 
-                    0.2, 
+                    "Color", 
+                    0.30000000000000004, 
                     0
                 ], 
                 [
@@ -195,32 +195,32 @@
             ], 
             [
                 [
-                    "Equalize", 
+                    "AutoContrast", 
                     0.2, 
                     8
                 ], 
                 [
                     "Equalize", 
                     0.6, 
-                    4
+                    5
                 ]
             ], 
             [
                 [
-                    "Color", 
-                    0.9, 
+                    "TranslateX", 
+                    1.0, 
                     9
                 ], 
                 [
                     "Equalize", 
-                    0.6, 
+                    0.5, 
                     6
                 ]
             ], 
             [
                 [
                     "AutoContrast", 
-                    0.8, 
+                    0.7000000000000001, 
                     4
                 ], 
                 [
@@ -237,13 +237,13 @@
                 ], 
                 [
                     "Color", 
-                    0.7, 
-                    0
+                    0.6, 
+                    1
                 ]
             ], 
             [
                 [
-                    "Solarize", 
+                    "Smooth", 
                     0.4, 
                     5
                 ], 
@@ -255,13 +255,13 @@
             ], 
             [
                 [
-                    "TranslateY", 
+                    "Color", 
                     0.9, 
-                    9
+                    8
                 ], 
                 [
-                    "TranslateY", 
-                    0.7, 
+                    "Solarize", 
+                    0.6, 
                     9
                 ]
             ], 
@@ -279,13 +279,13 @@
             ], 
             [
                 [
-                    "Equalize", 
-                    0.8, 
+                    "Sharpness", 
+                    0.9, 
                     8
                 ], 
                 [
-                    "Invert", 
-                    0.1, 
+                    "Smooth", 
+                    0.2, 
                     3
                 ]
             ], 
@@ -293,15 +293,15 @@
                 [
                     "TranslateY", 
                     0.7, 
-                    9
+                    8
                 ], 
                 [
-                    "AutoContrast", 
-                    0.9, 
-                    1
+                    "Sharpness", 
+                    1.0, 
+                    0
                 ]
             ]
         ], 
-        "id": "AutoAugmentBestCifar10Policy"
+        "id": "AutoAugmentBasedPopulation_exp_0001_20e_10p_25-2_00037_00008"
     }
 }

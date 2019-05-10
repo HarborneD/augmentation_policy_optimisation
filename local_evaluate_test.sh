@@ -1,4 +1,12 @@
-POLICY_ID="autoaugment_paper_cifar10"
+
+
+if [ $1 -eq 0 ]
+    then
+        POLICY_ID="autoaugment_paper_cifar10"
+    else
+        POLICY_ID="$1"
+
+fi
 echo policy_id: "$POLICY_ID"
 
 NUM_EPOCHS="200"

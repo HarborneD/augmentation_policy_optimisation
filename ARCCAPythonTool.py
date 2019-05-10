@@ -32,7 +32,7 @@ except:
 #[x] check job status 
 #[x] poll job status(blocking)
 #[ ] restart failed jobs
-#[ ] check expected start time for jobs
+#[X] check expected start time for jobs
 #[x] cancel job
 
 
@@ -41,11 +41,11 @@ except:
 #[ ] get quota of home
     #myquota
 
-#[ ] send files to remote location
+#[X] send files to remote location
 
-#[ ] directory of remote location
+#[X] directory of remote location
 
-#[ ] fetch files from remote location
+#[X] fetch files from remote location
 
 
 class ArccaTool(object):
@@ -82,8 +82,7 @@ class ArccaTool(object):
             print("Connect using system SSH first to verify host key manually. System keys are used by this tool.")
             print("___")
             self.client.load_system_host_keys()
-            # self.decoded_key = paramiko.RSAKey(data=base64.b64decode(b'SHA:AAA='))
-            # self.client.get_host_keys().add(self.host, 'ssh-rsa', self.decoded_key)
+            
         else:
             print("___")
             print("Accepted system host keys will be used to check server identity.")
@@ -91,8 +90,7 @@ class ArccaTool(object):
             print("___")
             print("")
             self.client.load_system_host_keys()
-            # print("Warning: no host key provided - can't confirm identity of server")
-            # self.client.set_missing_host_key_policy(paramiko.WarningPolicy())
+            
 
 
     ###CREDENTIAL FUNCTIONS
@@ -142,6 +140,7 @@ class ArccaTool(object):
 
     ###COMMANDS
     def SendCommand(self,command):
+        #Send raw command via SSH to server
         try:
             stdin, stdout, stderr = self.client.exec_command(command)
         except:
@@ -354,10 +353,7 @@ class ArccaTool(object):
 
     def StartBatchJob(self,account,run_from_path,script_name, args=""):
         #stdin, stdout, stderr, job_id = arcca_tool.StartBatchJob("fyp_scw1427","/home/c.c0919382/test_scripts","test_tensorflow.sh")
-        #TODO: remove these
-        #fyp_scw1427
-        #dais_scw1077
-        
+                
         cd_command = self.COMMANDS["change_directory"]+" "+run_from_path+" ;"
         post_job_command = self.COMMANDS["batch_job"]+" --account="+account+" "+script_name+" "+args
         print("post_job_command")
@@ -384,6 +380,8 @@ class ArccaTool(object):
         self.user_jobs_list.append(job_id)
         
         return stdin, stdout, stderr, job_id, was_error
+
+
 
     ###SFTP FUNCTIONS
     def CreateSFTPConnection(self):
@@ -485,7 +483,7 @@ class ArccaTool(object):
                 self.RemoveRemoteDirectory(item_path)
             else:
                 self.DeleteRemoteFile(item_path)    
-               
+        
         self.CreateSFTPConnection()
         try:
             self.sftp.rmdir(path) 

@@ -345,13 +345,18 @@ def CreateAllNeighbours(chromosome,species_attributes):
             
             #set possible values of magnitude for current technique
             neighbour_move_value_ranges[2] = []
-            current_magnitude = chromosome[global_magnitude_i]
-            if(current_magnitude >= 0.1):
-                neighbour_move_value_ranges[2].append(current_magnitude-0.1)
 
-            if(current_magnitude <= 0.9):
-                neighbour_move_value_ranges[2].append(current_magnitude+0.1)
-            
+            technique_name = species_attributes["augmentation_list"][current_augmentation_local_i]
+            if technique_name in species_attributes["constant_magnitude_augmentations"]:
+                neighbour_move_value_ranges[2].append(1.0)
+            else:
+                current_magnitude = chromosome[global_magnitude_i]
+                if(current_magnitude >= 0.1):
+                    neighbour_move_value_ranges[2].append(current_magnitude-0.1)
+
+                if(current_magnitude <= 0.9):
+                    neighbour_move_value_ranges[2].append(current_magnitude+0.1)
+                
 
 
             for neighbour_move_func_i in range(len(neighbour_move_functions)):
@@ -861,7 +866,11 @@ if(__name__ == "__main__"):
         experiment_attributes["population_evaluation_function"] = LocalSequential
 
     augmentation_list = list(augmentation_transforms.TRANSFORM_NAMES)
+    augmentation_list = list(augmentation_transforms.FILTERED_TRANSFORM_NAMES)
+	
     experiment_attributes["augmentation_list"] = augmentation_list
+    constant_magnitude_augmentations = list(augmentation_transforms.IGNORES_MAGNITUDE_NAMES)
+    experiment_attributes["constant_magnitude_augmentations"] = constant_magnitude_augmentations
     
     print("")
     print("number of augmentations: ", len(augmentation_list))
@@ -886,6 +895,9 @@ if(__name__ == "__main__"):
 
     species_attributes = CreateSpeciesAttributeDict(population_size,len(augmentation_list), num_techniques_per_sub_policy, num_sub_policies_per_policy)
     
+    species_attributes["augmentation_list"] = augmentation_list
+    species_attributes["constant_magnitude_augmentations"] = constant_magnitude_augmentations
+
     experiment_attributes["species_attributes"] = species_attributes
 
     experiment_attributes["local_ga_directory"] = "/media/harborned/ShutUpN/repos/final_year_project/genetic_augment"

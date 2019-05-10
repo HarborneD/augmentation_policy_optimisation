@@ -30,7 +30,7 @@ if(__name__ == "__main__"):
 	if(len(sys.argv) > 1):
 		data_path = sys.argv[1]
 	experiment_attributes = {
-		"num_epochs":60
+		"num_epochs":120
 		,"data_path":data_path
 		,"dataset":"cifar10"
 		,"model_name":"wrn"
@@ -41,14 +41,17 @@ if(__name__ == "__main__"):
 		,"max_jobs":10
 		
 	}
-	experiment_attributes["experiment_id"] = "tabu_fTransf_AutoAugmentBasedPopulation_exp_0001_"+str(experiment_attributes["num_epochs"])+"e_"+str(experiment_attributes["tabu_list_size"])+"ls_25-2"
+	experiment_attributes["experiment_id"] = "tabu_fTransf_AutoAugmentBasedPopulation_exp_0002_"+str(experiment_attributes["num_epochs"])+"e_"+str(experiment_attributes["tabu_list_size"])+"ls_25-2"
 	
 
 	augmentation_list = list(augmentation_transforms.TRANSFORM_NAMES)
 	augmentation_list = list(augmentation_transforms.FILTERED_TRANSFORM_NAMES)
 	
 	experiment_attributes["augmentation_list"] = augmentation_list
-    
+	
+	constant_magnitude_augmentations = list(augmentation_transforms.IGNORES_MAGNITUDE_NAMES)
+	experiment_attributes["constant_magnitude_augmentations"] = constant_magnitude_augmentations
+
 
 	if(train_remote):
 		print("Training Remotely")
@@ -65,6 +68,10 @@ if(__name__ == "__main__"):
 	population_size = 1
 
 	species_attributes = CreateSpeciesAttributeDict(population_size,len(augmentation_list), num_techniques_per_sub_policy, num_sub_policies_per_policy)
+
+	species_attributes["augmentation_list"] = augmentation_list
+	species_attributes["constant_magnitude_augmentations"] = constant_magnitude_augmentations
+
 
 	experiment_attributes["species_attributes"] = species_attributes
 
@@ -95,6 +102,8 @@ if(__name__ == "__main__"):
 		current_policy = PolicyJsonToChromosome(paper_policy_json,augmentation_list,species_attributes)
 		# best_policy_id = "paper_policy_20epoch"
 		# best_accuracy = 0.62
+		best_policy_id = "paper_policy_120epoch"
+		best_accuracy = 0.852
 
 	else:
 		current_policy = CreateRandomChromosome(species_attributes)

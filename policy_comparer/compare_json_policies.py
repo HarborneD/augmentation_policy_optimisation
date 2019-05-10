@@ -1,10 +1,11 @@
 import json
+import os
 
-
-def LoadPolicys(policy_path_list):
+def LoadPolicys(policy_path_list,policy_dir):
     policy_jsons = []
 
     for policy_path in policy_path_list:
+        policy_path = os.path.join(policy_dir,policy_path+".json")
         with open(policy_path, "r") as f:
             policy_jsons.append( json.loads(f.read())  )
     
@@ -179,16 +180,19 @@ def ProduceSortedDicts(policy_list,longest_policy, sort_technique_index = 0):
 
 
 if __name__ == "__main__":
+    path_to_policies_of_interest = "/media/harborned/ShutUpN/repos/final_year_project/genetic_augment/policies_of_interest"
     policy_paths = [
-        "autoaugment_paper_cifar10.json"
-        # ,"policies_of_interest/pso_exp_0002_20e_10p_1-20_00196.json" 
-        # ,"policies_of_interest/AutoAugmentBasedPopulation_exp_0002_120e_10p_25-2_00005_00005.json"
-        ,"policies_of_interest/tabu_AutoAugmentBasedPopulation_exp_0001_20e_100ls_25-2_00001_00850.json"
+        "autoaugment_paper_cifar10"
+        # ,"pso_exp_0002_20e_10p_1-20_00196" 
+        # ,"AutoAugmentBasedPopulation_exp_0002_120e_10p_25-2_00005_00005"
+        #,"tabu_AutoAugmentBasedPopulation_exp_0001_20e_100ls_25-2_00001_00850"
+        ,"AutoAugmentBasedPopulation_exp_0001_20e_10p_25-2_00037_00008"
+        ,"AutoAugmentBasedPopulation_exp_0001_20e_10p_25-2_00087_00004"
     ]
 
     longest_policy = 25
 
-    loaded_policy_list = LoadPolicys(policy_paths)
+    loaded_policy_list = LoadPolicys(policy_paths, path_to_policies_of_interest)
 
     policy_list = SortPolicys(loaded_policy_list)
 

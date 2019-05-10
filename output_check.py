@@ -98,7 +98,7 @@ def FetchEntryByJobId(job_id,output_dict,sorted_outputs_array):
 		return None
 
 
-def PopulateResultsFile(path_to_results_file, outputs_dict, policy_dict, sorted_outputs_array, output_file_path=""):
+def PopulateResultsFile(path_to_results_file, outputs_dict, policy_dict, sorted_outputs_array, output_file_path="", skip_missing_accuracies=False):
 	if(output_file_path == ""):
 		output_file_path = path_to_results_file.replace(".csv","_updated.csv")
 	
@@ -109,24 +109,29 @@ def PopulateResultsFile(path_to_results_file, outputs_dict, policy_dict, sorted_
 		for row in results_reader:
 			policy_id = row["policy_id"]
 			job_id = row["job_id"] 
-			
-			if(job_id != ""):
-				result = FetchEntryByJobId(job_id,outputs_dict, sorted_outputs_array)
-				if result is None:
-					print("could not find job: "+str(job_id))
-					continue
-				row["policy_id"] = result["policy_id"]
-			# elif(policy_id != ""):
-			# 	result = FetchEntryByPolicyId(policy_id,policy_dict, sorted_outputs_array)
-			# 	if result is None:
-			# 		continue
-			# 	row["job_id"] = result["job_id"]
-			else:
-				print(policy_id, row["trial_num"], "job id empty")
-				continue
-			
+			accuracy = row["accuracy"]
+
 			if(row["accuracy"] == ""):
-				row["accuracy"] = str(result["accuracy"])
+				if(job_id != ""):
+					result = FetchEntryByJobId(job_id,outputs_dict, sorted_outputs_array)
+					if result is None:
+						print("could not find job: "+str(job_id))
+						if(skip_missing_accuracies):
+							continue
+					else:
+						row["policy_id"] = result["policy_id"]
+						row["accuracy"] = str(result["accuracy"])
+				# elif(policy_id != ""):
+				# 	result = FetchEntryByPolicyId(policy_id,policy_dict, sorted_outputs_array)
+				# 	if result is None:
+				# 		continue
+				# 	row["job_id"] = result["job_id"]
+				else:
+					print(policy_id,"|", row["trial_num"],"|",row["description"],"|", "job id empty")
+					if(skip_missing_accuracies):
+						continue
+				
+				
 			
 			entries.append(row)
 
